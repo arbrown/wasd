@@ -11,7 +11,7 @@ paginate = 8
     weight = 1
 [params]
   author = "Drew Brown"
-  description = "Drew's thoughts on coding for the cloud."
+  description = "Drew's thoughts on coding for the cloud"
   menu_item_separator = " - "
   avatar = "images/drewbr.png"
   [[params.social]]
