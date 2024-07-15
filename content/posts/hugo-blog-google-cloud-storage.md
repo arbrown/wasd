@@ -10,6 +10,7 @@ Some content
 
 Some notes:
 * Provisioning the cert for your load balancer takes time. Do it first!
+  * Took me about 40 minutes, but could be longer
 * APIs used in this solution (maybe enable them upfront?)
   * compute
   * storage
