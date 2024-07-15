@@ -1,0 +1,13 @@
+steps:
+  - name: $_BUILDER_IMAGE
+    args:
+      - hugo
+  - name: $_BUILDER_IMAGE
+    args:
+      - hugo
+      - deploy
+      - --target=storage_bucket
+options:
+  logging: CLOUD_LOGGING_ONLY
+substitutions:
+  _BUILDER_IMAGE: 'hugomods/hugo:exts'
