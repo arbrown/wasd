@@ -1,6 +1,30 @@
-baseURL = 'https://example.org/'
+baseURL = "https://wasd.drewbrown.me"
+title = "Drew's Tech Blog"
 languageCode = 'en-us'
-title = 'My New Hugo Site'
+paginate = 8
+
+[menu]
+  [[menu.main]]
+    identifier = "home"
+    name = "Home"
+    url = "/"
+    weight = 1
+[params]
+  author = "Drew Brown"
+  description = "Drew's thoughts on coding for the cloud."
+  menu_item_separator = " - "
+  avatar = "images/drewbr.png"
+  [[params.social]]
+    icon = "github"
+    name = "Github"
+    url = "https://github.com/arbrown"
+  # Orange theme (created by Gemini :D)
+  [params.style]
+    darkestColor = "#613600"  # Dark Orange (almost brown)
+    darkColor = "#382100"     # Slightly lighter, still dark
+    lightColor = "#f2d9b2"     # Very light orange (muted)
+    lightestColor = "#f9e6d2"   # Even lighter for contrast
+    primaryColor = "#e67700"   # Bright orange accent 
 
 [module]
   [[module.imports]]
