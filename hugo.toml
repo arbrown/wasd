@@ -28,4 +28,9 @@ paginate = 8
 
 [module]
   [[module.imports]]
-    path = 'github.com/vaga/hugo-theme-m10c'
+    path = "github.com/vaga/hugo-theme-m10c"
+
+[deployment]
+  [[deployment.targets]]
+    name = "storage_bucket"
+    URL = "gs://wasd-blog"
