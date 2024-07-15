@@ -10,4 +10,7 @@ Some content
 
 Some notes:
 * Provisioning the cert for your load balancer takes time. Do it first!
-* 
+* APIs used in this solution (maybe enable them upfront?)
+  * compute
+  * storage
+  * build
