@@ -7,3 +7,7 @@ date = "2024-07-18"
 # Test
 Some content
 ![Setting access control settings](/images/gcp-blog/access-control.png)
+
+Some notes:
+* Provisioning the cert for your load balancer takes time. Do it first!
+* 
