@@ -6,7 +6,7 @@ date = "2024-07-18"
 
 # Test
 Some content
-![Setting access control settings](/images/gcp-blog/access-control.png)
+{{< figure src="/images/gcp-blog/access-control.png" title="Setting access control settings" >}}
 
 Some notes:
 * Provisioning the cert for your load balancer takes time. Do it first!
