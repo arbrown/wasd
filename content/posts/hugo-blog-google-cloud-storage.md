@@ -11,11 +11,6 @@ If that kind of setup appeals to you, this post can serve as a quick reference t
 * [Installed Hugo](https://gohugo.io/installation/) on your local computer
 * [Installed the `gcloud` CLI](https://cloud.google.com/sdk/docs/install-sdk) on your local computer, and logged in to your Google account
 
-
-<!-- # Test -->
-<!-- Some content -->
-<!-- {{< figure src="/images/gcp-blog/access-control.png" title="Setting access control settings" >}} -->
-
 Google Cloud already has [excellent documentation on hosting a static website](https://cloud.google.com/storage/docs/hosting-static-website) that I strongly recommend.  I'll cover some key steps here, but check out the documentation for more advanced use cases and options.
 
 ## Setting up a Cloud Storage bucket
@@ -88,7 +83,7 @@ hugo server
 ```
 
 ## Deploying to Google Cloud Storage
-Now leverage hugo's built-in deployment feature to push your site's files to your cloud storage bucket. `hugo deploy` uses the Google Cloud Storage API to check which files have changed (or been added or deleted) since the last time you uploaded them, and then does all the work to update your site with any new content you've added.
+Now leverage hugo's built-in [deployment feature](https://gohugo.io/hosting-and-deployment/hugo-deploy/) to push your site's files to your cloud storage bucket. `hugo deploy` uses the Google Cloud Storage API to check which files have changed (or been added or deleted) since the last time you uploaded them, and then does all the work to update your site with any new content you've added.
 
 Add the following section to `hugo.toml`:
 ```
