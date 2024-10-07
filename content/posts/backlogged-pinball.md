@@ -23,7 +23,7 @@ benefits in a fun, interactive way.
 
 In its current iteration, it highlights:
 
-1.  [Cloud PubSub](https://cloud.google.com/pubsub): Two-way PubSub communication with a novel source of events
+1.  [Cloud Pub/Sub](https://cloud.google.com/pubsub): Two-way Pub/Sub communication with a novel source of events
     (the pinball machine)
 1.  [Cloud Run](https://cloud.google.com/run/) / Cloud functions: Both serverless platforms process pinball
     events in real-time using different subscription mechanics (push vs. pull).
@@ -32,7 +32,7 @@ In its current iteration, it highlights:
 1.  [Cloud Firestore](https://firebase.google.com/docs/firestore): Firestore pushes all events to a live web-app. The round
     trip from:
 
-    Pinball machine **->** PubSub **->** Cloud Functions **->** Firestore **->**
+    Pinball machine **->** Pub/Sub **->** Cloud Functions **->** Firestore **->**
     Web App
 
     takes about 200 ms, and could probably be further optimized.
@@ -85,14 +85,14 @@ game skeleton code (which provides core game functionality). This code is
 distributed without an explicit license, and so we cannot release the game code
 publicly (yet).
 
-I did post [one sample method](https://github.com/GoogleCloudPlatform/backlogged-pinball-backend/blob/main/sample-code/csharp-pubsub/pubsub-post.cs) from the C# code to demonstrate what my custom PubSub client looked like.
+I did post [one sample method](https://github.com/GoogleCloudPlatform/backlogged-pinball-backend/blob/main/sample-code/csharp-pubsub/pubsub-post.cs) from the C# code to demonstrate what my custom Pub/Sub client looked like.
 
 ## Stay Tuned
 I'd like to keep writing about this pinball project in the coming months.  Hopefully in this space you'll see a few more posts about the project, including:
 
 * Pinball as an example of developing for the cloud on legacy hardware
 * Rolling your own authentication using JSON Web Tokens
-* PubSub as a means of 'inverting' client/cloud development
+* Pub/Sub as a means of 'inverting' client/cloud development
 * Using LLMs to gain insights into hyper-specific log information
 * Using Gemini to dip my toes into new programming paradigms (Unity, animations, particle effects, etc...)
 
