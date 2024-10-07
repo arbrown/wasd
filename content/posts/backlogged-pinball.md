@@ -23,13 +23,13 @@ benefits in a fun, interactive way.
 
 In its current iteration, it highlights:
 
-1.  Cloud PubSub: Two-way PubSub communication with a novel source of events
-    (The pinball machine)
-1.  Cloud Run / Cloud functions: Both serverless platforms process pinball
+1.  [Cloud PubSub](https://cloud.google.com/pubsub): Two-way PubSub communication with a novel source of events
+    (the pinball machine)
+1.  [Cloud Run](https://cloud.google.com/run/) / Cloud functions: Both serverless platforms process pinball
     events in real-time using different subscription mechanics (push vs. pull).
 1.  Cloud Run Deployments: Users can update a Cloud Run service in 20 seconds
     which has an immediate effect on the current pinball game
-1.  Cloud Firestore: Firestore pushes all events to a live web-app. The round
+1.  [Cloud Firestore](https://firebase.google.com/docs/firestore): Firestore pushes all events to a live web-app. The round
     trip from:
 
     Pinball machine **->** PubSub **->** Cloud Functions **->** Firestore **->**
