@@ -16,7 +16,7 @@ services.
 
 
 
-Backlogged pinball was designed to demonstrate specific cloud products and
+Backlogged pinball was designed to demonstrate specific Cloud products and
 benefits in a fun, interactive way.
 
 {{< figure src="/images/backlogged-pinball/backlogged-arch.png" width="600px" title="The pinball machine sends pubsub events to the cloud which are processed by Cloud Run and displayed on an interactive web app. Users can deploy their own Cloud Run service to process events and send pubsub messages back to the machine." >}}
@@ -56,7 +56,7 @@ Multimorphic SDK to handle interfacing with the hardware (including displays).
 ## What's next?
 {{< figure src="/images/backlogged-pinball/pinball_interview.jpeg" width="600px" title="Drew showing off the backlogged demo" >}}
 
-The pinball machine currently resides in a Google office in Salt Lake City.  Whenever I am able to, I plan on adding new features/functionality to the demo (with a major focus on cloud code).
+The pinball machine currently resides in a Google office in Salt Lake City.  Whenever I am able to, I plan on adding new features/functionality to the demo (with a major focus on Cloud code).
 
 I am currently working on a game advisor that uses [llama3.1-70b](https://ollama.com/library/llama3.1:70b) to grade your game and recommend more optimal strategies. 
 
@@ -76,7 +76,7 @@ Any ideas for new features?  I'd love to hear them!
 
 ## The code
 
-All backend code (web app, cloud functions, sample reaction services, etc...) is
+All backend code (web app, Cloud Run Functions, sample reaction services, etc...) is
 in
 [this GitHub repository](https://github.com/GoogleCloudPlatform/backlogged-pinball-backend/).
 
