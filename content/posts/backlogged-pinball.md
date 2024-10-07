@@ -48,7 +48,7 @@ in.
 
 Multimorphic also distributes
 [an SDK](https://www.multimorphic.com/p3-pinball-platform/3rd-party-developers/)
-to facilitate creating new pinball games.
+to facilitate creating new pinball games. The SDK works with an older version of the Unity game engine to run games on the physical pinball hardware using Mono as its runtime.
 
 Thus, Backlogged is an application that uses the Unity game engine and the
 Multimorphic SDK to handle interfacing with the hardware (including displays).
