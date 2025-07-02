@@ -23,7 +23,7 @@ My first choice would have been [Cloud Run](https://cloud.google.com/run?utm_cam
 
 Instead, I decided to use [GKE autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) to provision just the resources I wanted, when I want them. Also, I decided to use [Spot VMs]((https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog)) in order to save money.  This means my server can be pre-empted and shut down at any time, but with a robust setup, it will au to-save, and in practice, it doesn't actually happen too often.  This configuration required some initial setup, but lets me scale the size of the server as our factory grows, as well as turn it on and off on demand without having to deal with manually managing VMs, disks, or other parts of the cloud infrastructure.  I also know that I can repeat this process again to start fresh whenever I want to.  So let's dive in and see how I did it.
 
-{{< figure src="/images/factorio-gke-spot/factorio.png" width="400px" title="A successful launch is our goal!" >}}
+{{< figure src="/images/factorio-gke-spot/factorio.png" width="600px" title="A successful launch is our goal!" >}}
 
 ---
 
@@ -59,7 +59,7 @@ I used GKE autopilot for my cluster so that I don't have to manage nodes myself.
 
 Once your cluster is up, we'll apply some configuration to it.  This will allow the factorio server to run without needing a persistent server or disk that you have to manage.
 
-{{< figure src="/images/factorio-gke-spot/autopilot.png" width="400px" title="A GKE Autopilot Cluster" >}}
+{{< figure src="/images/factorio-gke-spot/autopilot.png" width="600px" title="A GKE Autopilot Cluster" >}}
 ---
 
 ### Kubernetes Configuration
@@ -435,4 +435,4 @@ Hopefully this guide helps you get started with your own GKE deployment of Facto
 ### Wishlist
 If I could add one feature, it would be the on-demand scaling up and down as we connect and disconnect from the server. I haven't cracked that bit yet, and I figure that the single-digit dollars it would save me are probably not worth spending too much time thinking about.  But if you've got a solution, I'd love to hear it!  Let me know!
 
-{{< figure src="/images/factorio-gke-spot/factoriok8s.png" width="400px" title="Factorio + Kubernetes" >}}
+{{< figure src="/images/factorio-gke-spot/factoriok8s.png" width="300px" title="Factorio + Kubernetes" >}}
