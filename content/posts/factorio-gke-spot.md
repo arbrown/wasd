@@ -4,7 +4,7 @@ tags = ["gcp", "gke", "gaming", "factorio", "tutorial"]
 date = 2025-07-09T09:37:42-06:00
 draft = true
 description = "A step-by-step guide to running a cost-effective, scalable, and automated Factorio server on Google Kubernetes Engine (GKE) using Autopilot, Spot VMs, and CronJobs."
-images = ["/images/factorio-gke-post/hero-image.png"] # Placeholder
+images = ["/images/factorio-gke-spot/factoriok8s.png"]
 +++
 
 I have been hooked on [Factorio](https://factorio.com/) for years now.  It is my favorite video game, and probably one of the most impressively documented feats of software engineering in gaming.  Check out their long-lived series of technical blog posts: [Factorio Facts Friday](https://factorio.com/blog/).  It's been a real treat learning about the development of the game as it has matured over the years.
@@ -23,7 +23,7 @@ My first choice would have been [Cloud Run](https://cloud.google.com/run), a _fa
 
 Instead, I decided to use [GKE autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview) to provision just the resources I wanted, when I want them.  This configuration required some initial setup, but lets me scale the size of the server as our factory grows, as well as turn it on and off on demand without having to deal with manually managing VMs, disks, or other parts of the cloud infrastructure.  I also know that I can repeat this process again to start fresh whenever I want to.  So let's dive in and see how I did it.
 
-*   **Suggested Image:** A humorous, AI-generated image of a Factorio construction bot building a GKE logo.
+{{< figure src="/images/factorio-gke-spot/factorio.png" width="400px" title="A successful launch is our goal!" >}}
 
 ---
 
@@ -59,8 +59,7 @@ I used GKE autopilot for my cluster so that I don't have to manage nodes myself.
 
 Once your cluster is up, we'll apply some configuration to it.  This will allow the factorio server to run without needing a persistent server or disk that you have to manage.
 
-*   **Suggested Image:** A screenshot of the GKE cluster view in the Google Cloud Console after it's created, showing the "Autopilot" mode.
-
+{{< figure src="/images/factorio-gke-spot/autopilot.png" width="400px" title="A GKE Autopilot Cluster" >}}
 ---
 
 ### Kubernetes Configuration
@@ -436,4 +435,4 @@ Hopefully this guide helps you get started with your own GKE deployment of Facto
 ### Wishlist
 If I could add one feature, it would be the on-demand scaling up and down as we connect and disconnect from the server. I haven't cracked that bit yet, and I figure that the single-digit dollars it would save me are probably not worth spending too much time thinking about.  But if you've got a solution, I'd love to hear it!  Let me know!
 
-*   **Suggested Image:** A personal photo of a complex Factorio factory you've built.
+{{< figure src="/images/factorio-gke-spot/factoriok8s.png" width="400px" title="Factorio + Kubernetes" >}}
