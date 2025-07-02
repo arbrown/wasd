@@ -15,13 +15,13 @@ Maybe it's overkill, but I think so! So I moved our server to the cloud...
 
 ## Finding the Right Hosting Solution
 
-Originally, I just manually installed the server software on a simple [GCE](https://cloud.google.com/products/compute) VM.  This got the job done, but it was a hassle managing updates, and most frustratingly, it was a challenge to dial in the right size of server as our factory grew.
+Originally, I just manually installed the server software on a simple [GCE](https://cloud.google.com/products/compute?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) VM.  This got the job done, but it was a hassle managing updates, and most frustratingly, it was a challenge to dial in the right size of server as our factory grew.
 
 Luckily, some kind folks maintain [container images](https://hub.docker.com/r/factoriotools/factorio/) of the Factorio headless server.  This alleviated some of my maintenance woes, but at this point, why not use a modern container-based solution?
 
-My first choice would have been [Cloud Run](https://cloud.google.com/run), a _fantastic_ serverless platform that can scale up and down to zero as needed.  However, Cloud Run is hyper-optimized for HTTP traffic, and Factorio uses [UDP](https://en.wikipedia.org/wiki/User_Datagram_Protocol) for faster, if less reliable communication. (This is the part where I'd tell you a joke about UDP, but you might not get it 🙄)
+My first choice would have been [Cloud Run](https://cloud.google.com/run?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog), a _fantastic_ serverless platform that can scale up and down to zero as needed.  However, Cloud Run is hyper-optimized for HTTP traffic, and Factorio uses [UDP](https://en.wikipedia.org/wiki/User_Datagram_Protocol) for faster, if less reliable communication. (This is the part where I'd tell you a joke about UDP, but you might not get it 🙄)
 
-Instead, I decided to use [GKE autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview) to provision just the resources I wanted, when I want them.  This configuration required some initial setup, but lets me scale the size of the server as our factory grows, as well as turn it on and off on demand without having to deal with manually managing VMs, disks, or other parts of the cloud infrastructure.  I also know that I can repeat this process again to start fresh whenever I want to.  So let's dive in and see how I did it.
+Instead, I decided to use [GKE autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) to provision just the resources I wanted, when I want them. Also, I decided to use [Spot VMs]((https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog)) in order to save money.  This means my server can be pre-empted and shut down at any time, but with a robust setup, it will au to-save, and in practice, it doesn't actually happen too often.  This configuration required some initial setup, but lets me scale the size of the server as our factory grows, as well as turn it on and off on demand without having to deal with manually managing VMs, disks, or other parts of the cloud infrastructure.  I also know that I can repeat this process again to start fresh whenever I want to.  So let's dive in and see how I did it.
 
 {{< figure src="/images/factorio-gke-spot/factorio.png" width="400px" title="A successful launch is our goal!" >}}
 
@@ -31,11 +31,11 @@ Instead, I decided to use [GKE autopilot](https://cloud.google.com/kubernetes-en
 
 ### What You'll Need (Prerequisites)
 
-*   A [Google Cloud](https://cloud.google.com/)) project with billing enabled.
+*   A [Google Cloud](https://cloud.google.com/?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog)) project with billing enabled.
 *   A Development Environment
     *   The `gcloud` CLI installed and authenticated.
     *   The `kubectl` command-line tool installed.
-    *   [Google Cloud Shell Editor](https://ide.cloud.google.com) works great for this, and has the necessary software pre-installed.
+    *   [Google Cloud Shell Editor](https://ide.cloud.google.com?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) works great for this, and has the necessary software pre-installed.
 
 *   **Suggested Image:** A screenshot of the `gcloud auth login` flow or the GCP console dashboard.
 
@@ -55,7 +55,7 @@ I used GKE autopilot for my cluster so that I don't have to manage nodes myself.
         --region "us-central1"
     ```
 
-(I used `us-central1` as a geographic compromise with friends on the East coast.  Feel free to pick a [different region](https://cloud.google.com/compute/docs/regions-zones) closer to you)
+(I used `us-central1` as a geographic compromise with friends on the East coast.  Feel free to pick a [different region](https://cloud.google.com/compute/docs/regions-zones?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) closer to you)
 
 Once your cluster is up, we'll apply some configuration to it.  This will allow the factorio server to run without needing a persistent server or disk that you have to manage.
 
@@ -301,7 +301,7 @@ This file does a few key things:
  * Start a pod running the Factorio dedicated server
    * Note the `resources` section of the deployment file.  This tells GKE what kind of resources we want for this server.  I'm using 2 cpu and 4Gi of memory because our game has grown quite large.  You could start lower (even as low as 0.5 cpu and 2Gi memory) and grow from there.
    * If you do change the settings, just re-deploy the `factorio-server.yaml`.  You might want to [scale down and up](#scaling-to-zero) the deployment to force it to use the new resource requests.
-   * Importantly, it uses [Spot VMs](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms) to save money. This means they can be shut down with no guarantee of availability. However, the Factorio server is fault-tolerant and will gracefully shut down and save your game.  In practice, our server rarely shuts down and when it does, it saves the game just fine.
+   * Importantly, it uses [Spot VMs](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) to save money. This means they can be shut down with no guarantee of availability. However, the Factorio server is fault-tolerant and will gracefully shut down and save your game.  In practice, our server rarely shuts down and when it does, it saves the game just fine.
      * If you want a more reliable (and expensive) server, you can simply remove the `nodeSelector` section or comment it out to use on-demand VMs.
  * Set up a `LoadBalancer` to provide an external IP address you will use to connect to your server
 
