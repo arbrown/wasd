@@ -353,8 +353,9 @@ metadata:
   name: factorio-scaler-role
 rules:
 - apiGroups: ["apps"]
-  resources: ["deployments"]
+  resources: ["deployments", "deployments/scale"]
   verbs: ["get", "patch"]
+  resourceNames: ["factorio-deployment"]
 
 ---
 
