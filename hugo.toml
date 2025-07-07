@@ -42,3 +42,7 @@ paginate = 8
   [[deployment.targets]]
     name = "storage_bucket"
     URL = "gs://wasd-blog"
+
+[markup]
+  [markup.highlight]
+    style = "monokai"

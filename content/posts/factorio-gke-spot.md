@@ -50,10 +50,10 @@ Instead, I decided to use [GKE autopilot](https://cloud.google.com/kubernetes-en
 
 I used GKE autopilot for my cluster so that I don't have to manage nodes myself.  This is particularly handy when migrating to a larger VM, or scaling down to zero when we're not playing for a while.
 
-    ```bash
-    gcloud container clusters create-auto "factorio-autopilot" \
-        --region "us-central1"
-    ```
+```bash
+gcloud container clusters create-auto "factorio-autopilot" 
+    --region "us-central1"
+```
 
 (I used `us-central1` as a geographic compromise with friends on the East coast.  Feel free to pick a [different region](https://cloud.google.com/compute/docs/regions-zones?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) closer to you)
 
@@ -317,9 +317,10 @@ This file does a few key things:
 
 Since we set up a `LoadBalancer` in our yaml file, GKE will automatically create an external IP address we can use to connect to our game (and share with friends).  Find yours by inspecting the deployed service:
 
-    ```bash
-    kubectl get service factorio-service
-    ```
+```bash
+kubectl get service factorio-service
+```
+
 You'll see the external IP address labelled as `EXTERNAL-IP`.  Use this address to connect to your server.
 
 ---
