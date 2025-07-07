@@ -37,8 +37,6 @@ Instead, I decided to use [GKE autopilot](https://cloud.google.com/kubernetes-en
     *   The `kubectl` command-line tool installed.
     *   [Google Cloud Shell Editor](https://ide.cloud.google.com?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) works great for this, and has the necessary software pre-installed.
 
-*   **Suggested Image:** A screenshot of the `gcloud auth login` flow or the GCP console dashboard.
-
 ---
 
 ### Building the Foundation - Your GKE Autopilot Cluster
@@ -304,11 +302,6 @@ This file does a few key things:
    * Importantly, it uses [Spot VMs](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) to save money. This means they can be shut down with no guarantee of availability. However, the Factorio server is fault-tolerant and will gracefully shut down and save your game.  In practice, our server rarely shuts down and when it does, it saves the game just fine.
      * If you want a more reliable (and expensive) server, you can simply remove the `nodeSelector` section or comment it out to use on-demand VMs.
  * Set up a `LoadBalancer` to provide an external IP address you will use to connect to your server
-
-
-*   **Suggested Images:**
-    *   A diagram showing how a `Pod` uses a `PVC` and `ConfigMap`.
-    *   A screenshot of your `factorio-server.yaml` in a code editor, with the `nodeSelector` section highlighted.
 
 ---
 
