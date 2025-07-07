@@ -55,7 +55,8 @@ gcloud container clusters create-auto "factorio-autopilot"
 
 (I used `us-central1` as a geographic compromise with friends on the East coast.  Feel free to pick a [different region](https://cloud.google.com/compute/docs/regions-zones?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) closer to you)
 
-Once your cluster is up, we'll apply some configuration to it.  This will allow the factorio server to run without needing a persistent server or disk that you have to manage.
+Once your autopilot cluster is up, we'll apply some configuration to it.  This configuration will allow the factorio server to run without needing a persistent server or disk that you have to manage.
+
 
 {{< figure src="/images/factorio-gke-spot/autopilot.png" width="600px" title="A GKE Autopilot Cluster" >}}
 ---
@@ -64,16 +65,16 @@ Once your cluster is up, we'll apply some configuration to it.  This will allow 
 
 #### Config Maps
 
-Since we're running a [generic container](https://hub.docker.com/r/factoriotools/factorio/) of a Factorio server, we need a way to get our configuration on there.  For this, I used Kubernetes Config Maps based on files on my computer (in this case, Cloud Shell).
+Since we're running a [generic container](https://hub.docker.com/r/factoriotools/factorio/) of a Factorio server, we need a way to get our game settings on there.  For this, I used Kubernetes Config Maps based on files on my computer (in this case, Cloud Shell).
 
 I created two directories, `config` and `mods` (optional, but lots of fun to customize your server.)
 
 In `config` you'll need your core factorio server configuration files:
 
-    *   `map-gen-settings.json`
-    *   `map-settings.json`
-    *   `server-adminlist.json`
-    *   `server-settings.json`
+*   `map-gen-settings.json`
+*   `map-settings.json`
+*   `server-adminlist.json`
+*   `server-settings.json`
 
 You can find examples of these in the [factorio-data](https://github.com/wube/factorio-data) repository on GitHub.  Copy the examples there and customize as needed.
 
@@ -296,6 +297,7 @@ This file does a few key things:
 
  * Set up a `PersistentVolumeClaim` (a disk) to save our game and load our configs
  * Use `initContainer`s to initialize the disk with our configuration, mods, and delete the existing map if necessary (CAREFUL here... it WILL delete your saves if you tell it to with the `GENERATE_NEW_MAP` flag, false by default)
+   * (The first time you start the server, it will generate a new map no matter what)
  * Start a pod running the Factorio dedicated server
    * Note the `resources` section of the deployment file.  This tells GKE what kind of resources we want for this server.  I'm using 2 cpu and 4Gi of memory because our game has grown quite large.  You could start lower (even as low as 0.5 cpu and 2Gi memory) and grow from there.
    * If you do change the settings, just re-deploy the `factorio-server.yaml`.  You might want to [scale down and up](#scaling-to-zero) the deployment to force it to use the new resource requests.
