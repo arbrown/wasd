@@ -1,4 +1,7 @@
 steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    script: |
+      chown -R 1000:1000 /workspace
   - name: $_BUILDER_IMAGE
     args:
       - build
