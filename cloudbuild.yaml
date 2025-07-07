@@ -1,6 +1,8 @@
 steps:
   - name: $_BUILDER_IMAGE
-    args: []
+    args:
+      - build
+      - --destination=public
   - name: $_BUILDER_IMAGE
     args:
       - deploy
