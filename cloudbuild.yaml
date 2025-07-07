@@ -10,4 +10,4 @@ steps:
 options:
   logging: CLOUD_LOGGING_ONLY
 substitutions:
-  _BUILDER_IMAGE: 'hugomods/hugo:exts'
+  _BUILDER_IMAGE: 'ghcr.io/gohugoio/hugo:latest'
