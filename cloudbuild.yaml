@@ -1,10 +1,9 @@
 steps:
   - name: $_BUILDER_IMAGE
     args:
-      - hugo
+      - --destination=public
   - name: $_BUILDER_IMAGE
     args:
-      - hugo
       - deploy
       - --target=storage_bucket
 options:
