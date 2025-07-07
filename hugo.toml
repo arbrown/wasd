@@ -1,7 +1,9 @@
 baseURL = "https://wasd.drewbrown.me"
 title = "Drew's Tech Blog"
 languageCode = 'en-us'
-paginate = 8
+
+[pagination]
+  pagerSize = 10
 
 [menu]
   [[menu.main]]
