@@ -9,7 +9,7 @@ images = ["/images/factorio-gke-spot/factoriok8s.png"]
 
 I have been hooked on [Factorio](https://factorio.com/) for years now.  It is my favorite video game, and probably one of the most impressively documented feats of software engineering in gaming.  Check out their long-lived series of technical blog posts: [Factorio Facts Friday](https://factorio.com/blog/).  It's been a real treat learning about the development of the game as it has matured over the years.
 
-One of my favorite parts of the game is playing cooperatively with others.  I've gotten to collaborate with friends on long-running games and some seriously impressive factories over the years.  Sometimes these games were hosted on personal computers, or basement servers, but that means we would rely on one memeber of the group to be online or manage the server even if others wanted to play at a different time.  Doesn't our impressive factory deserve an equally impressive and resilient server? 😉
+One of my favorite parts of the game is playing cooperatively with others.  I've gotten to collaborate with friends on long-running games and some seriously impressive factories over the years.  Sometimes these games were hosted on personal computers, or basement servers, but that means we would rely on one member of the group to be online or manage the server even if others wanted to play at a different time.  Doesn't our impressive factory deserve an equally impressive and resilient server? 😉
 
 Maybe it's overkill, but I think so! So I moved our server to the cloud...
 
@@ -19,9 +19,9 @@ Originally, I just manually installed the server software on a simple [GCE](http
 
 Luckily, some kind folks maintain [container images](https://hub.docker.com/r/factoriotools/factorio/) of the Factorio headless server.  This alleviated some of my maintenance woes, but at this point, why not use a modern container-based solution?
 
-My first choice would have been [Cloud Run](https://cloud.google.com/run?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog), a _fantastic_ serverless platform that can scale up and down to zero as needed.  However, Cloud Run is hyper-optimized for HTTP traffic, and Factorio uses [UDP](https://en.wikipedia.org/wiki/User_Datagram_Protocol) for faster, if less reliable communication. (This is the part where I'd tell you a joke about UDP, but you might not get it 🙄)
+My first choice would have been [Cloud Run](https://cloud.google.com/run?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog), a _fantastic_ serverless platform that can scale up and down to zero as needed.  However, Cloud Run is hyper-optimized for HTTP traffic, and Factorio uses [UDP](https://en.wikipedia.org/wiki/User_Datagram_Protocol) for faster, if less reliable communication. (This is the part where I'd tell you a joke about UDP, but you might not get it. 🙄)
 
-Instead, I decided to use [GKE autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) to provision just the resources I wanted, when I want them. Also, I decided to use [Spot VMs]((https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog)) in order to save money.  This means my server can be pre-empted and shut down at any time, but with a robust setup, it will au to-save, and in practice, it doesn't actually happen too often.  This configuration required some initial setup, but lets me scale the size of the server as our factory grows, as well as turn it on and off on demand without having to deal with manually managing VMs, disks, or other parts of the cloud infrastructure.  I also know that I can repeat this process again to start fresh whenever I want to.  So let's dive in and see how I did it.
+Instead, I decided to use [GKE Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) to provision just the resources I wanted, when I want them. Also, I decided to use [Spot VMs]((https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog)) in order to save money.  This means my server can be pre-empted and shut down at any time, but with a robust setup, it will auto-save, and in practice, it doesn't actually happen too often.  This configuration required some initial setup, but lets me scale the size of the server as our factory grows, as well as turn it on and off on demand without having to deal with manually managing VMs, disks, or other parts of the cloud infrastructure.  I also know that I can repeat this process again to start fresh whenever I want to.  So let's dive in and see how I did it.
 
 {{< figure src="/images/factorio-gke-spot/factorio.png" width="600px" title="A successful launch is our goal!" >}}
 
@@ -31,7 +31,7 @@ Instead, I decided to use [GKE autopilot](https://cloud.google.com/kubernetes-en
 
 ### What You'll Need (Prerequisites)
 
-*   A [Google Cloud](https://cloud.google.com/?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog)) project with billing enabled.
+*   A [Google Cloud](https://cloud.google.com/?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) project with billing enabled.
 *   A Development Environment
     *   The `gcloud` CLI installed and authenticated.
     *   The `kubectl` command-line tool installed.
@@ -46,16 +46,16 @@ Instead, I decided to use [GKE autopilot](https://cloud.google.com/kubernetes-en
     gcloud services enable container.googleapis.com
     ```
 
-I used GKE autopilot for my cluster so that I don't have to manage nodes myself.  This is particularly handy when migrating to a larger VM, or scaling down to zero when we're not playing for a while.
+I used GKE Autopilot for my cluster so that I don't have to manage nodes myself.  This is particularly handy when migrating to a larger VM, or scaling down to zero when we're not playing for a while.
 
 ```bash
 gcloud container clusters create-auto "factorio-autopilot" 
     --region "us-central1"
 ```
 
-(I used `us-central1` as a geographic compromise with friends on the East coast.  Feel free to pick a [different region](https://cloud.google.com/compute/docs/regions-zones?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) closer to you)
+(I used `us-central1` as a geographic compromise with friends on the East coast.  Feel free to pick a [different region](https://cloud.google.com/compute/docs/regions-zones?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) closer to you.)
 
-Once your autopilot cluster is up, we'll apply some configuration to it.  This configuration will allow the factorio server to run without needing a persistent server or disk that you have to manage.
+Once your cluster is up, we'll apply some configuration to it.  This configuration will allow the factorio server to run without needing a persistent server or disk that you have to manage.
 
 
 {{< figure src="/images/factorio-gke-spot/autopilot.png" width="600px" title="A GKE Autopilot Cluster" >}}
@@ -63,9 +63,9 @@ Once your autopilot cluster is up, we'll apply some configuration to it.  This c
 
 ### Kubernetes Configuration
 
-#### Config Maps
+#### ConfigMaps
 
-Since we're running a [generic container](https://hub.docker.com/r/factoriotools/factorio/) of a Factorio server, we need a way to get our game settings on there.  For this, I used Kubernetes Config Maps based on files on my computer (in this case, Cloud Shell).
+Since we're running a [generic container](https://hub.docker.com/r/factoriotools/factorio/) of a Factorio server, we need a way to get our game settings on there.  For this, I used Kubernetes ConfigMaps based on files on my computer (in this case, Cloud Shell).
 
 I created two directories, `config` and `mods` (optional, but lots of fun to customize your server.)
 
@@ -144,7 +144,7 @@ Here are the mods we play with, but you can find lots of others on the [Factorio
 
 ```
 
-Once your `config` and `mods` directories are set up the way you want them, deploy them as Config Maps:
+Once your `config` and `mods` directories are set up the way you want them, deploy them as ConfigMaps:
 
 ```bash
 kubectl create configmap factorio-configs --from-file=./config/
@@ -331,7 +331,7 @@ kubectl scale deployment factorio-deployment --replicas=1 # This will turn the s
 
 I use these commands to manually turn the server on and off as needed (or occasionally when it gets into a weird or slow state),
 
-But why not automate this?  We're not playing Factorio 24/7 (yet)
+But why not automate this?  We're not playing Factorio 24/7 (yet).
 
 `factorio-scaler.yaml`
 
