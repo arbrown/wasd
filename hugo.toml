@@ -20,6 +20,14 @@ languageCode = 'en-us'
     icon = "github"
     name = "Github"
     url = "https://github.com/arbrown"
+  [[params.social]]
+    icon = "twitter"
+    name = "Twitter"
+    url = "https://twitter.com/drew_wasd"
+  [[params.social]]
+    icon = "linkedin"
+    name = "LinkedIn"
+    url = "https://linkedin.com/in/drew-brown-"
   # Orange theme (created by Gemini :D)
   [params.style]
     darkestColor = "#613600"  # Dark Orange (almost brown)
@@ -36,3 +44,7 @@ languageCode = 'en-us'
   [[deployment.targets]]
     name = "storage_bucket"
     URL = "gs://wasd-blog"
+
+[markup]
+  [markup.highlight]
+    style = "monokai"
