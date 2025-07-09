@@ -2,7 +2,7 @@
 title = "The Factory Must Grow... on a Budget! Factorio on GKE with Spot VMs and Auto-Shutdown"
 tags = ["gcp", "gke", "gaming", "factorio", "tutorial"]
 date = 2025-07-09T09:37:42-06:00
-draft = true
+draft = false
 description = "A step-by-step guide to running a cost-effective, scalable, and automated Factorio server on Google Kubernetes Engine (GKE) using Autopilot, Spot VMs, and CronJobs."
 images = ["/images/factorio-gke-spot/factoriok8s.png"]
 +++
