@@ -27,12 +27,12 @@ The process involves two main stages:
 
 This tutorial uses billable components of Google Cloud, including:
 
-*   [**Compute Engine:**](https://cloud.google.com/compute/vm-instance-pricing?hl=en#accelerator-optimized) For the Slurm login and compute node VMs (including GPUs).
-*   [**Cloud Filestore:**](https://cloud.google.com/filestore/pricing?hl=en) For the shared file system (`/home` directory).
-*   [**Cloud Storage:**](https://cloud.google.com/storage/pricing) To store the Terraform state for the cluster deployment.
-*   [**Cloud Logging:**](https://cloud.google.com/stackdriver/pricing) For monitoring and logging.
+*   [**Compute Engine:**](https://cloud.google.com/compute/vm-instance-pricing?hl=en#accelerator-optimized&utm_campaign=CDR_0x145aeba1_default_b434709907&utm_medium=external&utm_source=blog) For the Slurm login and compute node VMs (including GPUs).
+*   [**Cloud Filestore:**](https://cloud.google.com/filestore/pricing?hl=en&utm_campaign=CDR_0x145aeba1_default_b434709907&utm_medium=external&utm_source=blog) For the shared file system (`/home` directory).
+*   [**Cloud Storage:**](https://cloud.google.com/storage/pricing?utm_campaign=CDR_0x145aeba1_default_b434709907&utm_medium=external&utm_source=blog) To store the Terraform state for the cluster deployment.
+*   [**Cloud Logging:**](https://cloud.google.com/stackdriver/pricing?utm_campaign=CDR_0x145aeba1_default_b434709907&utm_medium=external&utm_source=blog) For monitoring and logging.
 
-Use the [Google Cloud Pricing Calculator](https://cloud.google.com/products/calculator) to generate a cost estimate based on your projected usage.
+Use the [Google Cloud Pricing Calculator](https://cloud.google.com/products/calculator?utm_campaign=CDR_0x145aeba1_default_b434709907&utm_medium=external&utm_source=blog) to generate a cost estimate based on your projected usage.
 
 # Before you begin
 
@@ -65,7 +65,7 @@ These steps are performed on your local machine to prepare for deploying the clu
 
 # Obtain capacity and quota
 
-This tutorial requires `a4-highgpu-8g` VMs, which are in high demand. It is strongly recommended that you have a [reservation](https://cloud.google.com/compute/docs/instances/reservations-single-project) to ensure you can obtain the necessary capacity. You can deploy your cluster without a reservation, but this guide assumes you have already obtained a reservation for 2x `a4-highgpu-8g` VMs.
+This tutorial requires `a4-highgpu-8g` VMs, which are in high demand. It is strongly recommended that you have a [reservation](https://cloud.google.com/compute/docs/instances/reservations-single-project?utm_campaign=CDR_0x145aeba1_default_b434709907&utm_medium=external&utm_source=blog) to ensure you can obtain the necessary capacity. You can deploy your cluster without a reservation, but this guide assumes you have already obtained a reservation for 2x `a4-highgpu-8g` VMs.
 
 When you configure the deployment file in the next step, you will need to provide the name of your reservation in the `a4h_reservation_name` field.
 
@@ -108,7 +108,7 @@ When you configure the deployment file in the next step, you will need to provid
 Once the deployment is complete, the Cluster Toolkit has created several resources in your project. You can view and manage these resources in the Google Cloud Console.
 
 1.  **Navigate to the VM instances page:**
-    *   Go to the [Compute Engine VM instances page](https://console.cloud.google.com/compute/instances) in the Cloud Console.
+    *   Go to the [Compute Engine VM instances page](https://console.cloud.google.com/compute/instances?utm_campaign=CDR_0x145aeba1_default_b434709907&utm_medium=external&utm_source=blog) in the Cloud Console.
 2.  **Identify the Cluster Nodes:**
     *   You will see four new instances created by the deployment (the names will vary based on your `deployment_name`):
         *   A **login node** (e.g., `a4high-login-001`): This is the main entry point for interacting with the cluster, submitting jobs, and managing your environment.
@@ -508,7 +508,7 @@ You can monitor the GPU utilization for your cluster in the Google Cloud Console
 
 1.  **Construct the URL:** Copy the following URL and replace `[YOUR_PROJECT_ID]` with your actual Google Cloud project ID.
     ```
-    https://console.cloud.google.com/monitoring/metrics-explorer?project=[YOUR_PROJECT_ID]&pageState=%7B%22xyChart%22%3A%7B%22dataSets%22%3A%5B%7B%22timeSeriesFilter%22%3A%7B%22filter%22%3A%22metric.type%3D%5C%22agent.googleapis.com%2Fgpu%2Futilization%5C%22%20resource.type%3D%5C%22gce_instance%5C%22%22%2C%22perSeriesAligner%22%3A%22ALIGN_MEAN%22%7D%2C%22plotType%22%3A%22LINE%22%7D%5D%7D%7D
+    https://console.cloud.google.com/monitoring/metrics-explorer?project=[YOUR_PROJECT_ID]&pageState=%7B%22xyChart%22%3A%7B%22dataSets%22%3A%5B%7B%22timeSeriesFilter%22%3A%7B%22filter%22%3A%22metric.type%3D%5C%22agent.googleapis.com%2Fgpu%2Futilization%5C%22%20resource.type%3D%5C%22gce_instance%5C%22%22%2C%22perSeriesAligner%22%3A%22ALIGN_MEAN%22%7D%2C%22plotType%22%3A%22LINE%22%7D%5D%7D%7D&utm_campaign=CDR_0x145aeba1_default_b434709907&utm_medium=external&utm_source=blog
     ```
 2.  **View the Chart:** Open the link in your browser. You should see a chart displaying the "GPU utilization" for all GCE instances in your project.
 3.  **Expected Behavior:** For a healthy fine-tuning job, you should see the utilization for all 16 GPUs (8 on each of your 2 compute nodes) rise to a high level and stay there for the duration of the training.
