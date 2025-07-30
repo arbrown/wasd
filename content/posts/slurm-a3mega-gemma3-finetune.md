@@ -6,6 +6,8 @@ categories = ["Tutorials"]
 +++
 # Fine-tuning Gemma 3 on an A3 Mega Slurm Cluster
 
+**Note**: This post has been adapted into a [formal tutorial](https://cloud.google.com/ai-hypercomputer/docs/tutorials/gemma-3-slurm-cluster?utm_campaign=CDR_0x145aeba1_default_b425366127&utm_medium=external&utm_source=blog) on the Google Cloud documentation site.
+
 # Overview
 
 This post demonstrates how to fine-tune the Gemma 3 language model on a multi-node, multi-GPU Slurm cluster on Google Cloud. The cluster uses `a3-megagpu-8g` virtual machines, each equipped with 8 NVIDIA H100 GPUs.
