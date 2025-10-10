@@ -123,12 +123,11 @@ We will use the Google Cloud Cluster Toolkit to simplify the complex process of 
       a4h_reservation_name: RESERVATION_NAME
     ```
     **Note:** - This is where you would switch to a spot or DWS flex deployment if you chose those options.  Just comment/uncomment the appropriate lines.
-6.  **Modify the Cluster Blueprint for Lustre.** Before deploying, open the `examples/machine-learning/a4-highgpu-8g/a4high-slurm-blueprint.yaml` file. We will configure a Managed Lustre file system to provide a scalable, high-performance shared file system for our project. Make the following changes:
-    *   Comment out or remove the `filestore_homefs` module.
-    *   Uncomment the `lustrefs` module.
-    *   Set `per_unit_storage_throughput` to `500` (you may have to add this variable to the settings block if it is not there).
-    *   Set `size_gib` to `36000`.
-7.  Now, deploy the cluster from the base `cluster-toolkit` directory.
+5.  **Modify the Cluster Blueprint for Lustre.** Before deploying, open the `examples/machine-learning/a4-highgpu-8g/a4high-slurm-blueprint.yaml` file. We will configure a Managed Lustre file system to provide a scalable, high-performance shared file system for our project. Make the following changes, following the instructions in the blueprint file:
+    *   Comment out the `filestore_homefs` module.
+    *   Uncomment the `lustrefs` and `private-service-access` modules.
+    *   In the `vars` block, find `slurm_vars` and set `install_managed_lustre` to `true`.
+6.  Now, deploy the cluster from the base `cluster-toolkit` directory.
     ```shell
     ./gcluster deploy -d examples/machine-learning/a4-highgpu-8g/a4high-slurm-deployment.yaml examples/machine-learning/a4-highgpu-8g/a4high-slurm-blueprint.yaml --auto-approve
     ```
@@ -716,4 +715,4 @@ Now that you have a functional, high-performance training environment, here are 
 *   **Adjust Hyperparameters:** Experiment with different `per_device_train_batch_size`, `gradient_accumulation_steps`, and `learning_rate` to see what gets you the best performance for your specific task.
 *   **Explore Other Datasets:** Try fine-tuning Mixtral on a different dataset to see how well this pattern adapts to other domains.
 *   **Add Monitoring:** Integrate `wandb` or `TensorBoard` to log your training runs and visualize metrics like loss and accuracy.
-*   **Create a Serving Endpoint:** Once you have your fine-tuned model, you can deploy it to a serving endpoint using technologies like Google Cloud's Vertex AI to make it accessible for inference.
+*   **Create a Serving Endpoint:** Once you have your fine-tuned model, you can deploy it to a serving endpoint using GKE or Vertex AI to make it accessible for inference.
