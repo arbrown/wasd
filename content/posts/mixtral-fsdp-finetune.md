@@ -59,7 +59,7 @@ This tutorial assumes a working knowledge of Google Cloud. The following steps w
 2.  **Ensure billing is enabled** for your Cloud project.
 3.  **Enable the required APIs.**
     ```shell
-    gcloud services enable compute.googleapis.com file.googleapis.com logging.googleapis.com cloudresourcemanager.googleapis.com servicenetworking.googleapis.com
+    gcloud services enable compute.googleapis.com file.googleapis.com logging.googleapis.com cloudresourcemanager.googleapis.com servicenetworking.googleapis.com lustre.googleapis.com
     ```
 4.  **Grant the necessary IAM roles to your user account.**
     ```shell
@@ -126,7 +126,7 @@ We will use the Google Cloud Cluster Toolkit to simplify the complex process of 
 6.  **Modify the Cluster Blueprint for Lustre.** Before deploying, open the `examples/machine-learning/a4-highgpu-8g/a4high-slurm-blueprint.yaml` file. We will configure a Managed Lustre file system to provide a scalable, high-performance shared file system for our project. Make the following changes:
     *   Comment out or remove the `filestore_homefs` module.
     *   Uncomment the `lustrefs` module.
-    *   Set `per_unit_storage_throughput` to `500`.
+    *   Set `per_unit_storage_throughput` to `500` (you may have to add this variable to the settings block if it is not there).
     *   Set `size_gib` to `36000`.
 7.  Now, deploy the cluster from the base `cluster-toolkit` directory.
     ```shell
