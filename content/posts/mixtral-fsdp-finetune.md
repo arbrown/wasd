@@ -494,9 +494,9 @@ With the cluster provisioning underway, let's look at the scripts that will run 
 
 With the cluster now up and running, you're ready to connect and upload your scripts.
 
-1.  **Upload the scripts.** First, identify your login node by listing your A4 VMs.
+1.  **Upload the scripts.** First, identify your login node by listing your VMs.
     ```shell
-    gcloud compute instances list --filter="machineType:a4-highgpu-8g"
+    gcloud compute instances list
     ```
     Then, upload your scripts to the login node's home directory.
     ```shell
