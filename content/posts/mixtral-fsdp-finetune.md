@@ -1,7 +1,7 @@
 +++
 title =  "Fine-Tuning Mixtral-8x7B"
 tags = ["gcp", "slurm", "HPC", "tutorial", "ai-workloads", "LLM"]
-date = "2025-10-10"
+date = "2025-10-13"
 categories = ["Tutorials"]
 +++
 
