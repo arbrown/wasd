@@ -6,7 +6,7 @@ draft = false
 
 I've been a big fan of Gemini CLI since I was first lucky enough to test an early version internally it before it launched publicly.  It's become an integral part of my workflow, and MCP servers only expand the world of possibilities for what it can do.
 
-Maybe you've written your own MCP server.  Great!  (If not, then I know a [great tutorial](https://codelabs.developers.google.com/codelabs/cloud-run/how-to-deploy-a-secure-mcp-server-on-cloud-run) you can follow... 😏)
+Maybe you've written your own MCP server.  Great!  (If not, then I know a [great tutorial](https://codelabs.developers.google.com/codelabs/cloud-run/how-to-deploy-a-secure-mcp-server-on-cloud-run?utm_campaign=CDR_0x145aeba1_default_b452068522&utm_medium=external&utm_source=blog) you can follow... 😏)
 
 But not every MCP server can (or should) be available to the public.  Luckily, gemini-cli has built in support for OAuth 2.0.  This is straightforward if the oauth is already set up, but what if you want to add it to your own server?
 
@@ -14,11 +14,11 @@ This post will walk you through the process of setting up OAuth for a custom MCP
 
 ## MCP Server
 
-For this guide, I'm going to assume you already have an MCP server written that uses the FastMCP library. If you don't, you can follow this [Google codelab](https://codelabs.developers.google.com/codelabs/cloud-run/how-to-deploy-a-secure-mcp-server-on-cloud-run) to write your own example MCP server.  It's a quick process, and you'll be up and running in 30-60 minutes.
+For this guide, I'm going to assume you already have an MCP server written that uses the FastMCP library. If you don't, you can follow this [Google codelab](https://codelabs.developers.google.com/codelabs/cloud-run/how-to-deploy-a-secure-mcp-server-on-cloud-run?utm_campaign=CDR_0x145aeba1_default_b452068522&utm_medium=external&utm_source=blog) to write your own example MCP server.  It's a quick process, and you'll be up and running in 30-60 minutes.
 
 ## Creating OAuth Credentials
 
-Once you've got an MCP server, you'll need to create authorization credentials for your MCP server in Google Cloud. This will allow users to authenticate using any Google account and allow the server owner to restrict access. For this, follow [these instructions](https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred) for setting up a new OAuth Web App.
+Once you've got an MCP server, you'll need to create authorization credentials for your MCP server in Google Cloud. This will allow users to authenticate using any Google account and allow the server owner to restrict access. For this, follow [these instructions](https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred?utm_campaign=CDR_0x145aeba1_default_b452068522&utm_medium=external&utm_source=blog) for setting up a new OAuth Web App.
 
 {{< figure src="/images/gemini-cli-oauth-mcp/external.png" width="600px" title="Creating an external oauth client" >}}
 
