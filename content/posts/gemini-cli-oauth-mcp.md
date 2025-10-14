@@ -1,6 +1,6 @@
 +++
 title = 'Adding OAuth to a Custom MCP Server for Gemini CLI'
-date = 2025-10-14T12:00:01-06:00
+date = 2025-10-14T17:00:01-06:00
 draft = false
 +++
 
@@ -70,13 +70,13 @@ Next, to add this MCP server to Gemini CLI, you need to edit `~/.gemini/settings
     "my-mcp": {
       "httpUrl": "https://my-mcp-server-1234567890.us-west3.run.app/mcp",
       "oauth": {
-      "enabled": true
+        "enabled": true
       }
     }
   }
 ```
 
-It's important here that you match the URI that FastMCP exposes on your server.  In this case, `/mcp` (no trailing slash) is important, and even if `/mcp/` would redirect before, it might cause auth issues with oauth.
+It's important here that you match the URI that FastMCP exposes on your server.  In this case, `/mcp` (no trailing slash) is important, and even if `/mcp/` would redirect before, it might cause auth issues with OAuth.
 
 Finally, it's time to start up Gemini CLI and log in:
 
