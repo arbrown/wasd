@@ -1,6 +1,6 @@
 +++
 title = 'Adding OAuth to a Custom MCP Server for Gemini CLI'
-date = 2025-10-14T17:00:01-06:00
+date = 2025-10-17T13:00:01-06:00
 draft = false
 +++
 
