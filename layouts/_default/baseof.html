@@ -10,6 +10,14 @@
     <meta name="description" content="{{ if .IsHome }}{{ .Site.Params.description }}{{ else }}{{ .Description }}{{ end }}" />
     {{ $style := resources.Get "css/main.scss" | resources.ExecuteAsTemplate "css/main.scss" . | css.Sass | resources.Minify | resources.Fingerprint -}}
     <link rel="stylesheet" href="{{ $style.RelPermalink }}" />
+    <link href="/css/fonts.css" rel="stylesheet">
+    {{ if .Params.font_family }}
+    <style>
+      body {
+        font-family: '{{ .Params.font_family }}', sans-serif !important;
+      }
+    </style>
+    {{ end }}
     {{ with .OutputFormats.Get "rss" -}}
     {{ printf `<link rel=%q type=%q href=%q title=%q>` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
     {{ end }}
