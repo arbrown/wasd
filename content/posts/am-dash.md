@@ -35,7 +35,7 @@ So what, then, is the Am dash?  Getting a new character into the Unicode standar
 
 So our friend the Am dash is actually a ligature of the characters ‘am&#x200C;-’ in special fonts.  Neat\!
 
-But what does that mean for how LLMs generate text? The foundational building block for an LLM is the token.  Tokens are often (but not always) whole words, but any input you throw at an LLM is going to be processed by a tokenizer and turned into a stream of tokens for the model to process.  [Vertex AI Studio has a great tool](https://console.cloud.google.com/vertex-ai/studio/multimodal) to see how Gemini sees your text as tokens
+But what does that mean for how LLMs generate text? The foundational building block for an LLM is the token.  Tokens are often (but not always) whole words, but any input you throw at an LLM is going to be processed by a tokenizer and turned into a stream of tokens for the model to process.  [Vertex AI Studio has a great tool](https://console.cloud.google.com/vertex-ai/studio/multimodal?utm_campaign=CDR_0x145aeba1_default_b487273585&utm_medium=external&utm_source=blog) to see how Gemini sees your text as tokens
 
 {{< figure src="/images/am-dash/tokens.png" width="900px" title="Tokeinizing text" >}}
 
