@@ -1,0 +1,9 @@
+{{ define "main" }}
+  {{ if .Params.enable_fractions }}
+  <div class="fraction-text">
+    {{ .Content }}
+  </div>
+  {{ else }}
+    {{ .Content }}
+  {{ end }}
+{{ end }}

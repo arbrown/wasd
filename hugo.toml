@@ -46,5 +46,8 @@ languageCode = 'en-us'
     URL = "gs://wasd-blog"
 
 [markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
   [markup.highlight]
     style = "monokai"

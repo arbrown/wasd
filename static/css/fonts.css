@@ -1,0 +1,10 @@
+@font-face {
+  font-family: 'Areal';
+  src: url('/fonts/Areal.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.fraction-text {
+  font-feature-settings: "frac" 1;
+}
