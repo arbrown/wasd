@@ -2,7 +2,7 @@
 title = 'XPK Cluster Create'
 tags = ["xpk"]
 categories = ["Tutorials"]
-date = 2026-03-12T11:30:00-06:00
+date = 2026-03-12T14:38:00-06:00
 draft = false
 +++
 
@@ -83,4 +83,10 @@ xpk cluster delete \
 
 ## What's next
 
-`xpk` can make a complicated task like AI infrastructure management much faster, but it can do much more, too.  [Stay tuned](/tags/xpk/) to this space for more on `xpk` or the [Google Cloud Blog](https://cloud.google.com/blog?utm_campaign=CDR_0x145aeba1_default_b491866235&utm_medium=external&utm_source=blog) for the latest news on Google Cloud.
+
+`xpk` can make a complicated task like AI infrastructure management much faster, but it can do much more, too. For further reading, check out these resources:
+
+*   [Run MaxText via `xpk`](https://maxtext.readthedocs.io/en/latest/run_maxtext/run_maxtext_via_xpk.html)
+*   [Choosing an AI infrastructure strategy](https://docs.cloud.google.com/ai-hypercomputer/docs/choose-strategy?utm_campaign=CDR_0x145aeba1_default_b491866235&utm_medium=external&utm_source=blog)
+
+Stay tuned [/tags/xpk/) to this space for more on `xpk` or the [Google Cloud Blog](https://cloud.google.com/blog?utm_campaign=CDR_0x145aeba1_default_b491866235&utm_medium=external&utm_source=blog) for the latest news on Google Cloud.
