@@ -5,3 +5,4 @@ public/
 /assets/jsconfig.json
 hugo_stats.json
 gemini.md
+.venv/
