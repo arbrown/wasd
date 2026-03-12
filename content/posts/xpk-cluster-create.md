@@ -89,4 +89,4 @@ xpk cluster delete \
 *   [Run MaxText via `xpk`](https://maxtext.readthedocs.io/en/latest/run_maxtext/run_maxtext_via_xpk.html)
 *   [Choosing an AI infrastructure strategy](https://docs.cloud.google.com/ai-hypercomputer/docs/choose-strategy?utm_campaign=CDR_0x145aeba1_default_b491866235&utm_medium=external&utm_source=blog)
 
-Stay tuned [/tags/xpk/) to this space for more on `xpk` or the [Google Cloud Blog](https://cloud.google.com/blog?utm_campaign=CDR_0x145aeba1_default_b491866235&utm_medium=external&utm_source=blog) for the latest news on Google Cloud.
+[Stay tuned](/tags/xpk/) to this space for more on `xpk` or the [Google Cloud Blog](https://cloud.google.com/blog?utm_campaign=CDR_0x145aeba1_default_b491866235&utm_medium=external&utm_source=blog) for the latest news on Google Cloud.
