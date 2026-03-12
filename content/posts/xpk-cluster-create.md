@@ -58,6 +58,8 @@ xpk cluster create \
 
 This second command will be much faster! You simply swap out the node pools on the existing cluster and update some kueue resource definitions to reflect the new accelerator type.
 
+{{< figure src="/images/xpk-cluster-create/xpk-cluster-create.png" width="800px" title="XPK Cluster Create: Your Path to AI" >}}
+
 Finally, what if you want to run a single job across multiple (even hundreds or thousands of) TPUs? Let's look at a step to add the [Pathways operator](https://docs.cloud.google.com/ai-hypercomputer/docs/workloads/pathways-on-cloud/pathways-intro?utm_campaign=CDR_0x145aeba1_default_b491866235&utm_medium=external&utm_source=blog) for when you really want to scale out your TPU jobs (for this example, we'll keep it simple, with just two slices)!
 
 ```
