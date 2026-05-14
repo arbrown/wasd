@@ -6,3 +6,4 @@ public/
 hugo_stats.json
 gemini.md
 .venv/
+.old/
