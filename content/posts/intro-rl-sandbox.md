@@ -8,9 +8,9 @@ categories = ["Tutorials"]
 
 # Introduction to Distributed RL Sandboxing on GKE
 
-Reinforcement Learning (RL) is the cornerstone of modern AI training.  Rather than train a model to produce an expected output, we verify if it has achieved a particular _outcome_. This is particularly important when building models for use in agents that make decisions and take actions rather than just produce text. 
+[Reinforcement Learning](https://en.wikipedia.org/wiki/Reinforcement_learning) (RL) is the cornerstone of modern AI training.  Rather than train a model to produce an expected output, we verify if it has achieved a particular _outcome_. This is particularly important when building models for use in agents that make decisions and take actions rather than just produce text. 
 
-## What is RL and Why Sandbox?
+## Why a Sandbox for RL?
 
 In many RL workloads (like the one I'll discuss below), we're training a model for use in a coding workflow where it needs to write code and use tools (like `git` and `grep`) to accomplish a task like fixing a bug.
 
@@ -32,9 +32,9 @@ Here's a high-level view of what we build in the codelab:
 
 {{< figure src="/images/intro-rl-sandbox/gke-rl-architecture.png" width="600px" title="GKE RL Sandbox Architecture" >}}
 
-We'll set up a GKE cluster with a special "Warm Pool" of sandboxes designed for a specific task. In the example, our sandbox is configured to enable the agent to fix a small bug in a Python application. That means our sandbox has the right source code and dependencies already installed. In larger jobs, you could have different sandbox environments for different tasks, and intelligently (and quickly) route your agent-in-training to the right pod.
+We'll set up a GKE cluster with a special "Warm Pool" of sandboxes designed for a specific task. This Warm Pool keeps a specified number of pods ready to go, helping to prevent cold starts and ensure sandboxes are immediately ready for use. In the example, our sandbox is configured to enable the agent to fix a small bug in a Python application. That means our sandbox has the right source code and dependencies already installed. In larger jobs, you could have different sandbox environments for different tasks, and intelligently (and quickly) route your agent-in-training to the right pod.
 
-To keep execution latency under 200ms and avoid choking the Kubernetes control plane with constant pod creation, the orchestration plane (Ray) talks to a central **Sandbox Router** that manages and assigns pre-warmed sandboxes. 
+To keep execution latency low and avoid overwhelming the Kubernetes control plane with constant pod creation, the orchestration plane (Ray) talks to a central **Sandbox Router** that manages and assigns pre-warmed sandboxes. 
 
 Importantly, the Python training job never addresses an individual sandbox pod by its IP or name. Instead, it connects directly to the central router service and dynamically requests a sandbox matching its specific requirements.
 
