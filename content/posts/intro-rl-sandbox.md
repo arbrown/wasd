@@ -16,13 +16,13 @@ In many RL workloads (like the one I'll discuss below) we're training a model fo
 
 But training these agents presents a thorny problem.  What if, while it's learning, it makes a mistake?  Like a _really bad_ mistake.  Say an agent decided that running `rm -rf /` was the best way to fix a bug? No file system, no problem! That might be an extreme example, but you need a way to isolate the actions of these agents from your real infrastructure, especially when that infrastructure has expensive accelerators attached to it.
 
+{{< figure src="/images/intro-rl-sandbox/dog-sandbox.png" width="300px" title="A chaotic agent making a mess in the sandbox!" >}}
+
 A sandbox provides an isolated, secure environment where the agent can freely act without risking the host system or real-world data. It allows us to safely train agents on tasks that might otherwise be destructive or have unintended consequences.
 
 ## The Codelab: High-Performance Distributed RL Sandbox
 
 To help with this on [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog), I've put together a basic introductory codelab: [High-Performance Distributed RL Sandbox](https://codelabs.developers.google.com/codelabs/gke/high-performance-distributed-rl-sandbox?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog#0).
-
-<!-- TODO: Insert a funny GIF here, maybe a dog in a sandbox making a mess? -->
 
 This codelab focuses on the *how* of setting up a basic, distributed sandboxing environment using [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog) and [Agent Sandbox](https://cloud.google.com/kubernetes-engine/docs/concepts/agent-sandbox?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog). 
 
@@ -36,6 +36,6 @@ We'll set up a GKE cluster with a special "Warm Pool" of sandboxes designed for 
 
 This codelab is just the beginning. It sets the foundational infrastructure. In future posts, I'll dive deeper into more advanced RL concepts and explore sophisticated sandboxing techniques on GKE, like building a larger image library for your Sandbox Warm Pool or doing multi-turn training where the learning really starts to happen!
 
-<!-- TODO: Add an image hinting at future advanced topics, like a complex machinery or a brain glowing -->
+{{< figure src="/images/intro-rl-sandbox/advanced-topics.png" width="300px" title="Stay tuned to this space for more!" >}}
 
 Ready to build your sandbox? Head over to the [Codelab](https://codelabs.developers.google.com/codelabs/gke/high-performance-distributed-rl-sandbox?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog#0) and get started!
