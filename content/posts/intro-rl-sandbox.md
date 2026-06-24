@@ -20,11 +20,11 @@ A sandbox provides an isolated, secure environment where the agent can freely ac
 
 ## The Codelab: High-Performance Distributed RL Sandbox
 
-To help with this on GKE, I've put together a basic introductory codelab: [High-Performance Distributed RL Sandbox](https://codelabs.developers.google.com/codelabs/gke/high-performance-distributed-rl-sandbox#0).
+To help with this on [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog), I've put together a basic introductory codelab: [High-Performance Distributed RL Sandbox](https://codelabs.developers.google.com/codelabs/gke/high-performance-distributed-rl-sandbox?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog#0).
 
 <!-- TODO: Insert a funny GIF here, maybe a dog in a sandbox making a mess? -->
 
-This codelab focuses on the *how* of setting up a basic, distributed sandboxing environment using Google Kubernetes Engine (GKE) and Agent Sandbox. 
+This codelab focuses on the *how* of setting up a basic, distributed sandboxing environment using [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog) and [Agent Sandbox](https://cloud.google.com/kubernetes-engine/docs/concepts/agent-sandbox?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog). 
 
 Here's a high-level view of what we build in the codelab:
 
@@ -38,4 +38,4 @@ This codelab is just the beginning. It sets the foundational infrastructure. In 
 
 <!-- TODO: Add an image hinting at future advanced topics, like a complex machinery or a brain glowing -->
 
-Ready to build your sandbox? Head over to the [Codelab](https://codelabs.developers.google.com/codelabs/gke/high-performance-distributed-rl-sandbox#0) and get started!
+Ready to build your sandbox? Head over to the [Codelab](https://codelabs.developers.google.com/codelabs/gke/high-performance-distributed-rl-sandbox?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog#0) and get started!
