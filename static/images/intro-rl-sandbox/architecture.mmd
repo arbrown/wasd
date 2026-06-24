@@ -1,0 +1,25 @@
+graph TD
+    User([User / Data Scientist]) --> ControlPlane[GKE Control Plane]
+    
+    subgraph GKE Cluster
+        ControlPlane
+        
+        subgraph Training Workload
+            Trainer[RL Trainer Node<br/>GPU/TPU]
+        end
+        
+        subgraph Sandboxes
+            Sandbox1[Agent Sandbox 1<br/>Isolated Pod]
+            Sandbox2[Agent Sandbox 2<br/>Isolated Pod]
+            SandboxN[Agent Sandbox N<br/>Isolated Pod]
+        end
+        
+        Trainer <-->|Actions / Observations| Sandbox1
+        Trainer <-->|Actions / Observations| Sandbox2
+        Trainer <-->|Actions / Observations| SandboxN
+    end
+    
+    ControlPlane --> Trainer
+    ControlPlane --> Sandbox1
+    ControlPlane --> Sandbox2
+    ControlPlane --> SandboxN
