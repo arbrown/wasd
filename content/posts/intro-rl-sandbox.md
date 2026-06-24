@@ -24,7 +24,7 @@ A sandbox provides an isolated, secure environment where the agent can freely ac
 
 To help with this on [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog), I've put together a basic introductory codelab: [High-Performance Distributed RL Sandbox](https://codelabs.developers.google.com/codelabs/gke/high-performance-distributed-rl-sandbox?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog#0).
 
-Under the hood, GKE Agent Sandbox uses **gVisor** to intercept system calls and provide strong, kernel-level isolation. This ensures that even if an agent runs malicious or buggy code, it remains locked inside a secure playpen, unable to compromise the host node, the cluster, or your precious cloud credentials.
+Under the hood, GKE Agent Sandbox uses [gVisor](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog) to intercept system calls and provide strong, kernel-level isolation. This ensures that even if an agent runs malicious or buggy code, it remains locked inside a secure playpen, unable to compromise the host node, the cluster, or your precious cloud credentials.
 
 This codelab focuses on the *how* of setting up a basic, distributed sandboxing environment using [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog) and [Agent Sandbox](https://cloud.google.com/kubernetes-engine/docs/concepts/agent-sandbox?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog). 
 
