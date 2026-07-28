@@ -2,6 +2,10 @@ baseURL = "https://wasd.drewbrown.me"
 title = "Drew's Tech Blog"
 locale = 'en-us'
 
+[taxonomies]
+  category = "categories"
+  tag = "tags"
+
 [pagination]
   pagerSize = 10
 

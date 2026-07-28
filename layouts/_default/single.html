@@ -12,18 +12,17 @@
         {{ partial "icon.html" (dict "name" "clock") }}
         <span>{{ .ReadingTime }} min read</span>
       </span>
-      {{ with .Params.categories }}
-        {{ range . }}
-          <a href="{{ printf "/categories/%s/" (. | urlize) }}" class="badge-category">{{ . }}</a>
-        {{ end }}
+      {{ range .GetTerms "categories" }}
+        <a href="{{ .RelPermalink }}" class="badge-category">{{ .LinkTitle }}</a>
       {{ end }}
     </div>
 
-    {{ with .Params.tags }}
+    {{ $tags := .GetTerms "tags" }}
+    {{ with $tags }}
     <div class="tags-group" style="margin-top: 0.8rem;">
       {{ range . }}
-        <a href="{{ printf "/tags/%s/" (. | urlize) }}" class="tag-pill">
-          {{ partial "icon.html" (dict "name" "tag") }} {{ . }}
+        <a href="{{ .RelPermalink }}" class="tag-pill">
+          {{ partial "icon.html" (dict "name" "tag") }} {{ .LinkTitle }}
         </a>
       {{ end }}
     </div>

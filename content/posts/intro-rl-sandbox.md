@@ -2,7 +2,7 @@
 title = 'Introduction to Distributed RL Sandboxing on GKE'
 date = 2026-06-24T12:00:00-07:00
 draft = false
-categories = ["AI & Machine Learning"]
+categories = ["AI and Machine Learning"]
 tags = ["gke", "rl", "sandbox", "agents", "ai", "tutorial"]
 +++
 

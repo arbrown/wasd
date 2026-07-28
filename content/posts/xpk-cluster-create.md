@@ -2,7 +2,7 @@
 title = 'XPK Cluster Create'
 date = 2026-03-12T14:38:00-06:00
 draft = false
-categories = ["Cloud & Infrastructure"]
+categories = ["Cloud Infrastructure"]
 tags = ["xpk", "gke", "hpc", "gcp", "tutorial"]
 +++
 

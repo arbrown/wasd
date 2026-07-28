@@ -4,7 +4,7 @@ date = 2026-02-24T12:30:01-06:00
 draft = false
 font_family = 'Areal'
 enable_fractions = true
-categories = ["AI & Machine Learning"]
+categories = ["AI and Machine Learning"]
 tags = ["ai", "llm", "writing"]
 +++
 

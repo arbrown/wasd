@@ -1,7 +1,7 @@
 +++
 title = "Hosting a Hugo-Generated Blog on Google Cloud Storage"
 date = "2024-07-22"
-categories = ["Web & Tooling"]
+categories = ["Web and Tooling"]
 tags = ["hugo", "gcp", "cloud-storage", "tutorial"]
 +++
 

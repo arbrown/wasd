@@ -1,7 +1,7 @@
 +++
 title = "Fine-tuning Gemma3 on an A3 Mega Slurm Cluster"
 date = "2025-07-28T13:37:00-06:00"
-categories = ["AI & Machine Learning"]
+categories = ["AI and Machine Learning"]
 tags = ["slurm", "hpc", "gemma", "ai-workloads", "gcp", "tutorial"]
 +++
 # Fine-tuning Gemma 3 on an A3 Mega Slurm Cluster
