@@ -1,6 +1,6 @@
 baseURL = "https://wasd.drewbrown.me"
 title = "Drew's Tech Blog"
-languageCode = 'en-us'
+locale = 'en-us'
 
 [pagination]
   pagerSize = 10
@@ -11,6 +11,17 @@ languageCode = 'en-us'
     name = "Home"
     url = "/"
     weight = 1
+  [[menu.main]]
+    identifier = "categories"
+    name = "Categories"
+    url = "/categories/"
+    weight = 2
+  [[menu.main]]
+    identifier = "tags"
+    name = "Tags"
+    url = "/tags/"
+    weight = 3
+
 [params]
   author = "Drew Brown"
   description = "Drew's thoughts on coding for the cloud"
@@ -18,7 +29,7 @@ languageCode = 'en-us'
   avatar = "images/drewbr.png"
   [[params.social]]
     icon = "github"
-    name = "Github"
+    name = "GitHub"
     url = "https://github.com/arbrown"
   [[params.social]]
     icon = "twitter"
@@ -28,17 +39,14 @@ languageCode = 'en-us'
     icon = "linkedin"
     name = "LinkedIn"
     url = "https://linkedin.com/in/drew-brown-"
-  # Orange theme (created by Gemini :D)
-  [params.style]
-    darkestColor = "#613600"  # Dark Orange (almost brown)
-    darkColor = "#382100"     # Slightly lighter, still dark
-    lightColor = "#f2d9b2"     # Very light orange (muted)
-    lightestColor = "#f9e6d2"   # Even lighter for contrast
-    primaryColor = "#e67700"   # Bright orange accent 
 
-[module]
-  [[module.imports]]
-    path = "github.com/vaga/hugo-theme-m10c"
+  # Orange theme colors
+  [params.style]
+    darkestColor = "#613600"  # Dark Orange (sidebar/header background)
+    darkColor = "#382100"     # Main background
+    lightColor = "#f2d9b2"    # Body text
+    lightestColor = "#f9e6d2"  # Headings & highlights
+    primaryColor = "#e67700"  # Bright orange accent
 
 [deployment]
   [[deployment.targets]]
@@ -51,3 +59,5 @@ languageCode = 'en-us'
       unsafe = true
   [markup.highlight]
     style = "monokai"
+    lineNos = false
+    noClasses = false

@@ -1,63 +1,66 @@
 <!doctype html>
-<html lang="{{ .Site.LanguageCode | default "en-us" }}">
+<html lang="{{ with .Site.Language }}{{ .Locale }}{{ else }}en-us{{ end }}">
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} // {{ .Site.Title }}{{ end }}</title>
     <link rel="shortcut icon" href="{{ .Site.Params.favicon | default "/favicon.ico" }}" />
-    <meta charset="utf-8" />
-    {{ hugo.Generator }}
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="author" content="{{ .Site.Params.author | default "John Doe" }}" />
-    <meta name="description" content="{{ if .IsHome }}{{ .Site.Params.description }}{{ else }}{{ .Description }}{{ end }}" />
-    {{ $style := resources.Get "css/main.scss" | resources.ExecuteAsTemplate "css/main.scss" . | css.Sass | resources.Minify | resources.Fingerprint -}}
+    <meta name="author" content="{{ .Site.Params.author | default "Drew Brown" }}" />
+    <meta name="description" content="{{ if .IsHome }}{{ .Site.Params.description }}{{ else if .Description }}{{ .Description }}{{ else }}{{ .Summary }}{{ end }}" />
+    
+    {{ $style := resources.Get "css/style.css" | resources.Minify | resources.Fingerprint }}
     <link rel="stylesheet" href="{{ $style.RelPermalink }}" />
-    <link href="/css/fonts.css" rel="stylesheet">
-    {{ if .Params.font_family }}
-    <style>
-      body {
-        font-family: '{{ .Params.font_family }}', sans-serif !important;
-      }
-    </style>
-    {{ end }}
-    {{ with .OutputFormats.Get "rss" -}}
+    <link href="/css/fonts.css" rel="stylesheet" />
+
+    {{ with .OutputFormats.Get "rss" }}
     {{ printf `<link rel=%q type=%q href=%q title=%q>` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
     {{ end }}
 
     {{ template "_internal/google_analytics.html" . }}
     {{ template "_internal/twitter_cards.html" . }}
     {{ template "_internal/opengraph.html" . }}
-
   </head>
   <body>
     <header class="app-header">
-      <a href="{{ "" | relURL }}"><img class="app-header-avatar" src="{{ .Site.Params.avatar | default "avatar.jpg" | relURL }}" alt="{{ .Site.Params.author | default "John Doe" }}" /></a>
-      <span class="app-header-title">{{ .Site.Title }}</span>
-      {{- with .Site.Menus.main }}
+      <a href="{{ "" | relURL }}">
+        <img class="app-header-avatar" src="{{ .Site.Params.avatar | default "images/drewbr.png" | relURL }}" alt="{{ .Site.Params.author }}" />
+      </a>
+      <span class="app-header-title"><a href="{{ "" | relURL }}" style="color: inherit;">{{ .Site.Title }}</a></span>
+      <p class="app-header-description">{{ .Site.Params.description }}</p>
+
+      {{ with .Site.Menus.main }}
       <nav class="app-header-menu">
-        {{- range $key, $item := . }}
-          {{- if ne $key 0 }}
-            {{ $.Site.Params.menu_item_separator | default " - " | safeHTML }}
-          {{ end }}
-          <a class="app-header-menu-item" href="{{ $item.URL }}">{{ $item.Name }}</a>
-        {{- end }}
+        {{ range . }}
+          <a class="app-header-menu-item{{ if or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }} active{{ end }}" href="{{ .URL | relURL }}">{{ .Name }}</a>
+        {{ end }}
       </nav>
-      {{- end }}
-      <p>{{ .Site.Params.description | default "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vehicula turpis sit amet elit pretium." }}</p>
-      {{- with .Site.Params.social }}
+      {{ end }}
+
+      {{ with .Site.Params.social }}
       <div class="app-header-social">
         {{ range . }}
-          <a href="{{ .url }}" target="_blank" rel="noreferrer noopener me">
-            {{ partial "icon.html" (dict "ctx" $ "name" .icon "title" .name) }}
+          <a href="{{ .url }}" target="_blank" rel="noreferrer noopener me" title="{{ .name }}">
+            {{ partial "icon.html" (dict "name" .icon) }}
           </a>
         {{ end }}
+        <a href="{{ "/index.xml" | relURL }}" target="_blank" title="RSS Feed">
+          {{ partial "icon.html" (dict "name" "rss") }}
+        </a>
       </div>
-      {{- end }}
-    </header>
-    <main class="app-container">
-      {{ block "main" . }}
-        {{ .Content }}
       {{ end }}
+    </header>
+
+    <main class="app-container">
+      <div class="content-wrapper">
+        {{ block "main" . }}{{ end }}
+        
+        <footer class="app-footer">
+          <p>&copy; {{ now.Format "2006" }} {{ .Site.Params.author }}. Built with Hugo.</p>
+        </footer>
+      </div>
     </main>
-    <!-- GoatCounter Analytics -->
+
+    <!-- Analytics -->
     <script data-goatcounter="https://gc.drewbrown.me/count" async src="https://gc.drewbrown.me/count.js"></script>
   </body>
 </html>

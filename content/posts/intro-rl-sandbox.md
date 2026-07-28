@@ -2,8 +2,8 @@
 title = 'Introduction to Distributed RL Sandboxing on GKE'
 date = 2026-06-24T12:00:00-07:00
 draft = false
-tags = ["gke", "rl", "sandbox", "agents"]
-categories = ["Tutorials"]
+categories = ["AI & Machine Learning"]
+tags = ["gke", "rl", "sandbox", "agents", "ai", "tutorial"]
 +++
 
 # Introduction to Distributed RL Sandboxing on GKE
@@ -16,7 +16,7 @@ In many RL workloads (like the one I'll discuss below), we're training a model f
 
 But training these agents presents a thorny problem. What if, while it's learning, it makes a mistake? Like a _really bad_ mistake. Say an agent decided that running `rm -rf /` was the best way to fix a bug? *No file system, no problem!* That might be an extreme example, but you need a way to isolate the actions of these agents from your real infrastructure—especially when that infrastructure has expensive accelerators attached to it.
 
-{{< figure src="/images/intro-rl-sandbox/dog-sandbox.png" width="300px" title="A chaotic agent making a mess in the sandbox!" >}}
+![A chaotic agent making a mess in the sandbox!](/images/intro-rl-sandbox/dog-sandbox.png)
 
 A sandbox provides an isolated, secure environment where the agent can freely act without risking the host system or real-world data. It allows us to safely train agents on tasks that might otherwise be destructive or have unintended consequences.
 
@@ -30,7 +30,7 @@ This codelab focuses on the *how* of setting up a basic, distributed sandboxing 
 
 Here's a high-level view of what we build in the codelab:
 
-{{< figure src="/images/intro-rl-sandbox/gke-rl-architecture.png" width="600px" title="GKE RL Sandbox Architecture" >}}
+![GKE RL Sandbox Architecture](/images/intro-rl-sandbox/gke-rl-architecture.png)
 
 We'll set up a GKE cluster with a special "Warm Pool" of sandboxes designed for a specific task. This Warm Pool keeps a specified number of pods ready to go, helping to prevent cold starts and ensure sandboxes are immediately ready for use. In the example, our sandbox is configured to enable the agent to fix a small bug in a Python application. That means our sandbox has the right source code and dependencies already installed. In larger jobs, you could have different sandbox environments for different tasks, and intelligently (and quickly) route your agent-in-training to the right pod.
 
@@ -62,7 +62,7 @@ print(f"Output: {result.stdout}")
 
 This codelab is just the beginning. It sets the foundational infrastructure. In future posts, I'll dive deeper into more advanced RL concepts and explore sophisticated sandboxing techniques on GKE, like building a larger image library for your Sandbox Warm Pool or doing multi-turn training where the learning really starts to happen!
 
-{{< figure src="/images/intro-rl-sandbox/advanced-topics.png" width="300px" title="Stay tuned to this space for more!" >}}
+![Stay tuned to this space for more!](/images/intro-rl-sandbox/advanced-topics.png)
 
 Ready to build your sandbox? Head over to the [Codelab](https://codelabs.developers.google.com/codelabs/gke/high-performance-distributed-rl-sandbox?utm_campaign=CDR_0x145aeba1_default_b527527409&utm_medium=external&utm_source=blog#0) and get started!
 
