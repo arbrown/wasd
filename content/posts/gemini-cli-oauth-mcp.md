@@ -2,6 +2,8 @@
 title = 'Adding OAuth to a Custom MCP Server for Gemini CLI'
 date = 2025-10-17T13:00:01-06:00
 draft = false
+categories = ["Web and Tooling"]
+tags = ["mcp", "gemini", "oauth", "ai", "llm"]
 +++
 
 I've been a big fan of Gemini CLI since I was first lucky enough to test an early version internally it before it launched publicly.  It's become an integral part of my workflow, and MCP servers only expand the world of possibilities for what it can do.
@@ -20,7 +22,7 @@ For this guide, I'm going to assume you already have an MCP server written that 
 
 Once you've got an MCP server, you'll need to create authorization credentials for your MCP server in Google Cloud. This will allow users to authenticate using any Google account and allow the server owner to restrict access. For this, follow [these instructions](https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred?utm_campaign=CDR_0x145aeba1_default_b452068522&utm_medium=external&utm_source=blog) for setting up a new OAuth Web App.
 
-{{< figure src="/images/gemini-cli-oauth-mcp/external.png" width="600px" title="Creating an external oauth client" >}}
+![Creating an external oauth client](/images/gemini-cli-oauth-mcp/external.png)
 
 You can choose to allow anyone with a Google account to authenticate, or limit it to just your organization.  You can alos configure a list of email addresses to use while you are still "testing" your application, and this may be sufficient for your needs.
 
@@ -30,7 +32,7 @@ When you create your credentials, you'll need to specify authorized redirect URI
 2.  **Server Verification URI:** The `gemini-cli` sends the received code to your MCP server. Your server then communicates with Google's backend to verify this code and exchange it for an access token. For this step, Google needs to trust your server's callback URL. You must also add your server's public callback URI, for example `https://my-mcp-server-1234567890.us-west3.run.app/auth/callback`, to the authorized list.
 3.  **Optional Localhost IP URI:** While not strictly required by `gemini-cli` (which uses `localhost`), some applications use the IP address `127.0.0.1` for the local callback. To ensure broader compatibility, you might consider adding `http://127.0.0.1/callback` to your authorized list.
 
-{{< figure src="/images/gemini-cli-oauth-mcp/redirects.png" width="600px" title="Make sure your redirects match the server URL EXACTLY" >}}
+![Make sure your redirects match the server URL EXACTLY](/images/gemini-cli-oauth-mcp/redirects.png)
 
 **Important:** After saving your redirect URI settings, you must wait at least 5 minutes (and sometimes longer) for the changes to propagate through Google's systems. If you think you've set it up right and it's not working, just grab a coffee and check back later..
 
@@ -86,4 +88,4 @@ gemini
 
 In Gemini CLI, authenticate with your server with `/mcp auth my-mcp`. This will start the authentication flow in your browser.  If it doesn't open up a browser, you can copy/paste the URL it gives you and navigate there yourself.
 
-{{< figure src="/images/gemini-cli-oauth-mcp/success.png" width="800px" title="A successful OAuth Login!" >}}
+![A successful OAuth Login!](/images/gemini-cli-oauth-mcp/success.png)

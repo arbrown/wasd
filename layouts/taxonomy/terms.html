@@ -1,0 +1,16 @@
+{{ define "main" }}
+<div class="list-header">
+  <h1 class="page-title">{{ .Title }}</h1>
+  <p class="page-subtitle">Browse articles by {{ .Title | lower }}.</p>
+</div>
+
+<div class="taxonomy-cloud">
+  {{ $type := .Data.Plural }}
+  {{ range .Data.Terms.ByCount }}
+    <a href="{{ .Page.RelPermalink }}" class="taxonomy-card">
+      <span class="taxonomy-name">{{ .Page.Title }}</span>
+      <span class="taxonomy-count">{{ .Count }}</span>
+    </a>
+  {{ end }}
+</div>
+{{ end }}

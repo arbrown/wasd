@@ -1,10 +1,11 @@
 +++
 title = "The Factory Must Grow... on a Budget! Factorio on GKE with Spot VMs and Auto-Shutdown"
-tags = ["gcp", "gke", "gaming", "factorio", "tutorial"]
 date = 2025-07-09T09:37:42-06:00
 draft = false
 description = "A step-by-step guide to running a cost-effective, scalable, and automated Factorio server on Google Kubernetes Engine (GKE) using Autopilot, Spot VMs, and CronJobs."
 images = ["/images/factorio-gke-spot/factoriok8s.png"]
+categories = ["Projects"]
+tags = ["factorio", "gaming", "gke", "gcp", "tutorial"]
 +++
 
 I have been hooked on [Factorio](https://factorio.com/) for years now.  It is my favorite video game, and probably one of the most impressively documented feats of software engineering in gaming.  Check out their long-lived series of technical blog posts: [Factorio Facts Friday](https://factorio.com/blog/).  It's been a real treat learning about the development of the game as it has matured over the years.
@@ -23,7 +24,7 @@ My first choice would have been [Cloud Run](https://cloud.google.com/run?utm_cam
 
 Instead, I decided to use [GKE Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) to provision just the resources I wanted, when I want them. Also, I decided to use [Spot VMs](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) in order to save money.  This means my server can be pre-empted and shut down at any time, but with a robust setup, it will auto-save, and in practice, it doesn't actually happen too often.  This configuration required some initial setup, but lets me scale the size of the server as our factory grows, as well as turn it on and off on demand without having to deal with manually managing VMs, disks, or other parts of the cloud infrastructure.  I also know that I can repeat this process again to start fresh whenever I want to.  So let's dive in and see how I did it.
 
-{{< figure src="/images/factorio-gke-spot/factorio.png" width="600px" title="A successful launch is our goal!" >}}
+![A successful launch is our goal!](/images/factorio-gke-spot/factorio.png)
 
 ---
 
@@ -58,7 +59,7 @@ gcloud container clusters create-auto "factorio-autopilot"
 Once your cluster is up, we'll apply some configuration to it.  This configuration will allow the factorio server to run without needing a persistent server or disk that you have to manage.
 
 
-{{< figure src="/images/factorio-gke-spot/autopilot.png" width="600px" title="A GKE Autopilot Cluster" >}}
+![A GKE Autopilot Cluster](/images/factorio-gke-spot/autopilot.png)
 ---
 
 ### Kubernetes Configuration
@@ -432,4 +433,4 @@ Hopefully this guide helps you get started with your own GKE deployment of Facto
 ### Wishlist
 If I could add one feature, it would be the on-demand scaling up and down as we connect and disconnect from the server. I haven't cracked that bit yet, and I figure that the single-digit dollars it would save me are probably not worth spending too much time thinking about.  But if you've got a solution, I'd love to hear it!  Let me know!
 
-{{< figure src="/images/factorio-gke-spot/factoriok8s.png" width="300px" title="Factorio + Kubernetes" >}}
+![Factorio + Kubernetes](/images/factorio-gke-spot/factoriok8s.png)

@@ -1,7 +1,8 @@
 +++
-title =  "Hosting a Hugo-Generated Blog on Google Cloud Storage"
-tags = ["hugo", "gcp"]
+title = "Hosting a Hugo-Generated Blog on Google Cloud Storage"
 date = "2024-07-22"
+categories = ["Web and Tooling"]
+tags = ["hugo", "gcp", "cloud-storage", "tutorial"]
 +++
 
 This site is hosted on Google Cloud using a Cloud Storage bucket to serve static HTML files generated using [Hugo](https://gohugo.io/).  I like this setup because it is _fast_, simple, and the content is easy to move to another platform or hosting provider if I want to.
@@ -47,8 +48,8 @@ replace `my-blog-files` with the name for your storage bucket
 ## Set up your load balancer and SSL certificate
 Next, set up your load balancer and SSL certificate for your domain.  I've found this easiest to do [in the console](https://cloud.google.com/storage/docs/hosting-static-website#lb-ssl).
 
-{{< figure src="/images/gcp-blog/new-cert.png" width="400px" title="Creating a new certificate for the site" >}}
-{{< figure src="/images/gcp-blog/finalize-lb.png" title="Setting up a load balancer with SSL" >}}
+![Creating a new certificate for the site](/images/gcp-blog/new-cert.png)
+![Setting up a load balancer with SSL](/images/gcp-blog/finalize-lb.png)
 
 ## Setting up your Hugo site
 

@@ -1,7 +1,8 @@
 +++
-title =  "Backlogged Pinball"
-tags = ["pinball", "gcp", "next"]
+title = "Backlogged Pinball"
 date = "2024-10-07"
+categories = ["Projects"]
+tags = ["pinball", "gcp", "gke", "cloud-run", "ai"]
 +++
 
 # Backlogged Pinball
@@ -10,7 +11,7 @@ Earlier this year, I built a pinball-based demo for [Cloud Next 2024](https://cl
 services.
 
 
-{{< figure src="/images/backlogged-pinball/pinball_suit.jpeg" width="600px" title="A conference attendee playing the Backlogged pinball demo" >}}
+![A conference attendee playing the Backlogged pinball demo](/images/backlogged-pinball/pinball_suit.jpeg)
 
 ## Demo overview
 
@@ -19,7 +20,7 @@ services.
 Backlogged pinball was designed to demonstrate specific Cloud products and
 benefits in a fun, interactive way.
 
-{{< figure src="/images/backlogged-pinball/backlogged-arch.png" width="600px" title="The pinball machine sends pubsub events to the cloud which are processed by Cloud Run and displayed on an interactive web app. Users can deploy their own Cloud Run service to process events and send pubsub messages back to the machine." >}}
+![The pinball machine sends pubsub events to the cloud which are processed by Cloud Run and displayed on an interactive web app. Users can deploy their own Cloud Run service to process events and send pubsub messages back to the machine.](/images/backlogged-pinball/backlogged-arch.png)
 
 In its current iteration, it highlights:
 
@@ -39,7 +40,7 @@ In its current iteration, it highlights:
 
 ## The machine
 
-{{< figure src="/images/backlogged-pinball/pinball_wide.jpeg" width="600px" title="The demo featured live-updating high scores and current game status" >}}
+![The demo featured live-updating high scores and current game status](/images/backlogged-pinball/pinball_wide.jpeg)
 
 The actual physical pinball machine is a
 [Multimorphic P3](https://www.multimorphic.com/p3-pinball-platform/). In short,
@@ -54,13 +55,13 @@ Thus, Backlogged is an application that uses the Unity game engine and the
 Multimorphic SDK to handle interfacing with the hardware (including displays).
 
 ## What's next?
-{{< figure src="/images/backlogged-pinball/pinball_interview.jpeg" width="600px" title="Drew showing off the backlogged demo" >}}
+![Drew showing off the backlogged demo](/images/backlogged-pinball/pinball_interview.jpeg)
 
 The pinball machine currently resides in a Google office in Salt Lake City.  Whenever I am able to, I plan on adding new features/functionality to the demo (with a major focus on Cloud code).
 
 I am currently working on a game advisor that uses [llama3.1-70b](https://ollama.com/library/llama3.1:70b) to grade your game and recommend more optimal strategies. 
 
-{{< figure src="/images/backlogged-pinball/genkit.png" width="600px" title="A sample game analysis from the prototype" >}}
+![A sample game analysis from the prototype](/images/backlogged-pinball/genkit.png)
 
 In the future, I'd love to add more features like:
 

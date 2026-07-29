@@ -1,9 +1,70 @@
 {{ define "main" }}
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-single-title">{{ .Title }}</h1>
+    
+    <div class="post-meta">
+      <span class="post-meta-item">
+        {{ partial "icon.html" (dict "name" "calendar") }}
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time>
+      </span>
+      <span class="post-meta-item">
+        {{ partial "icon.html" (dict "name" "clock") }}
+        <span>{{ .ReadingTime }} min read</span>
+      </span>
+      {{ range .GetTerms "categories" }}
+        <a href="{{ .RelPermalink }}" class="badge-category">{{ .LinkTitle }}</a>
+      {{ end }}
+    </div>
+
+    {{ $tags := .GetTerms "tags" }}
+    {{ with $tags }}
+    <div class="tags-group" style="margin-top: 0.8rem;">
+      {{ range . }}
+        <a href="{{ .RelPermalink }}" class="tag-pill">
+          {{ partial "icon.html" (dict "name" "tag") }} {{ .LinkTitle }}
+        </a>
+      {{ end }}
+    </div>
+    {{ end }}
+  </header>
+
   {{ if .Params.enable_fractions }}
-  <div class="fraction-text">
+  <div class="post-content fraction-text">
     {{ .Content }}
   </div>
   {{ else }}
+  <div class="post-content">
     {{ .Content }}
+  </div>
   {{ end }}
+
+  <div class="post-footer-nav">
+    {{ $related := site.RegularPages.Related . | first 3 }}
+    {{ with $related }}
+    <div class="related-posts">
+      <h3>Related Articles</h3>
+      <ul>
+        {{ range . }}
+        <li>
+          <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+          <span style="color: var(--text-muted); font-size: 0.85rem;"> — {{ .Date.Format "Jan 2, 2006" }}</span>
+        </li>
+        {{ end }}
+      </ul>
+    </div>
+    {{ end }}
+
+    <div style="display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+      {{ with .PrevInSection }}
+        <a href="{{ .RelPermalink }}" class="tag-pill" style="padding: 0.5rem 1rem;">&larr; {{ .Title | truncate 30 }}</a>
+      {{ else }}
+        <div></div>
+      {{ end }}
+      {{ with .NextInSection }}
+        <a href="{{ .RelPermalink }}" class="tag-pill" style="padding: 0.5rem 1rem;">{{ .Title | truncate 30 }} &rarr;</a>
+      {{ end }}
+    </div>
+  </div>
+</article>
 {{ end }}

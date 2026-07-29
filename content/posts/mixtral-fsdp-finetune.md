@@ -1,12 +1,12 @@
 +++
-title =  "Fine-Tuning Mixtral-8x7B"
-tags = ["gcp", "slurm", "HPC", "tutorial", "ai-workloads", "LLM"]
+title = "Fine-Tuning Mixtral-8x7B"
 date = "2025-10-13"
-categories = ["Tutorials"]
+categories = ["AI and Machine Learning"]
+tags = ["slurm", "hpc", "llm", "ai-workloads", "gcp", "tutorial"]
 +++
 
 # Fine-Tuning Mixtral-8x7B: A Deep Dive into a Multi-Node Slurm and FSDP Workflow
-{{< figure src="/images/mixtral/banner.png" width="800px" >}}
+![](/images/mixtral/banner.png)
 
 Training or fine-tuning large language models like Mixtral-8x7B is a significant challenge due to their large size. Sometimes, to make these models fit on available hardware, you can _quantize_ a model and reduce the model's weights to a lower precision. While this can be an effective strategy for inference, it can introduce a loss of quality when fine-tuning a model for a specific task.
 
@@ -21,7 +21,7 @@ You've probably seen tutorials like this before, but the real interesting part o
 *   **Cluster Toolkit:** The open source toolkit I use to tie together all of the pieces and manage my infrastructure.
 
 
-{{< figure src="/images/mixtral/slug.png" width="300px" >}}
+![](/images/mixtral/slug.png)
 ---
 
 ### A Note on Resource Availability
@@ -202,7 +202,7 @@ With the cluster provisioning underway, let's look at the scripts that will run 
     protobuf==6.31.1
     ```
 
-{{< figure src="/images/mixtral/layers.png" width="300px" >}}
+![](/images/mixtral/layers.png)
 
 3.  **Create `train-mixtral.py`:** This is the core training script. It uses Hugging Face's `SFTTrainer` to simplify the FSDP and LoRA setup, allowing us to focus on the fine-tuning logic.
 
@@ -533,7 +533,7 @@ With the cluster now up and running, you're ready to connect and upload your scr
 
 With the environment prepped, it's time to submit the training job to the Slurm scheduler.
 
-{{< figure src="/images/mixtral/launch.png" width="300px" title="Launch the training job" >}}
+![Launch the training job](/images/mixtral/launch.png)
 
 1.  Submit the job.
     ```shell

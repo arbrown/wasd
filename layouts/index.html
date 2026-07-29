@@ -1,0 +1,15 @@
+{{ define "main" }}
+<div class="home-intro">
+  <h1 class="page-title">Latest Articles</h1>
+  <p class="page-subtitle">Thoughts on cloud infrastructure, AI workloads, Kubernetes, and developer tools.</p>
+</div>
+
+<div class="posts-list">
+  {{ $paginator := .Paginate (where .Site.RegularPages "Type" "in" .Site.Params.mainSections) }}
+  {{ range $paginator.Pages }}
+    {{ partial "post-card.html" . }}
+  {{ end }}
+</div>
+
+{{ template "_internal/pagination.html" . }}
+{{ end }}

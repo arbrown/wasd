@@ -1,0 +1,39 @@
+<article class="post-card">
+  <div class="post-card-header">
+    <h2 class="post-card-title">
+      <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+    </h2>
+    <div class="post-meta">
+      <span class="post-meta-item">
+        {{ partial "icon.html" (dict "name" "calendar") }}
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "Jan 2, 2006" }}</time>
+      </span>
+      <span class="post-meta-item">
+        {{ partial "icon.html" (dict "name" "clock") }}
+        <span>{{ .ReadingTime }} min read</span>
+      </span>
+      {{ range .GetTerms "categories" }}
+        <a href="{{ .RelPermalink }}" class="badge-category">{{ .LinkTitle }}</a>
+      {{ end }}
+    </div>
+  </div>
+
+  <div class="post-summary">
+    {{ if .Summary }}
+      {{ .Summary | truncate 240 }}
+    {{ else }}
+      {{ .Plain | truncate 240 }}
+    {{ end }}
+  </div>
+
+  {{ $tags := .GetTerms "tags" }}
+  {{ with $tags }}
+  <div class="tags-group">
+    {{ range . }}
+      <a href="{{ .RelPermalink }}" class="tag-pill">
+        {{ partial "icon.html" (dict "name" "tag") }} {{ .LinkTitle }}
+      </a>
+    {{ end }}
+  </div>
+  {{ end }}
+</article>

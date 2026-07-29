@@ -1,0 +1,8 @@
+<figure class="image-figure">
+  <a href="{{ .Destination | safeURL }}" target="_blank" rel="noopener">
+    <img src="{{ .Destination | safeURL }}" alt="{{ .Text }}" {{- with .Title }} title="{{ . }}"{{ end }} loading="lazy" />
+  </a>
+  {{- if or .Text .Title }}
+  <figcaption>{{ with .Title }}{{ . }}{{ else }}{{ .Text }}{{ end }}</figcaption>
+  {{- end }}
+</figure>
