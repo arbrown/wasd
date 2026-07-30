@@ -1,7 +1,7 @@
 +++
 title = "Encoding Ops Wisdom: Building the GKE AI Migration Skill"
 date = 2026-07-29T12:00:00-06:00
-draft = true
+draft = false
 categories = ["AI and Machine Learning", "Kubernetes"]
 tags = ["gke", "ai", "skills", "kubernetes", "vllm", "gcp", "agents"]
 description = "The GKE AI Migration Skill provides a set of rails for Agents to follow to accomplish a specific task, hopefully with fewer tokens."
