@@ -14,7 +14,7 @@ I created [a skill](https://github.com/google/skills/blob/main/skills/cloud/goog
 # When Would You Use It?
 
 ## Manual Migrations
-The skill is great for setting up the infrastructure you need on GKE if you are already running AI inference on a different (more managed) platform on Google Cloud.  Note that this skill is for people who want a more hands-on experience — you get to see or run the commands yourself, and see the yaml manifests as they are being constructed in your existing workspace. If you express a preference for a more automated solution like [Gemini Cloud Assist](https://cloud.google.com/gemini/docs/cloud-assist/overview?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog) it can refer you to the documentation to get that set up in your project.
+The skill is great for setting up the infrastructure you need on GKE if you are already running AI inference on a different (more managed) platform on Google Cloud.  Note that this skill is for people who want a more hands-on experience — you get to see or run the commands yourself, and see the yaml manifests as they are being constructed in your existing workspace. If you express a preference for a more automated solution like [Gemini Cloud Assist](https://cloud.google.com/gemini/docs/cloud-assist/overview?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog), it can refer you to the documentation to get that set up in your project.
 
 ## The Golden Path
 
@@ -57,13 +57,13 @@ This is the part that I was most skeptical of when I started this project; model
 
 \#WorksForMe. 
 
-Ok, so that's not great proof, but I did walk through using the skill with various models and configuration requirements.  In my (subjective) experience, it was quite convenient to have the skill do the heavy lifting by asking me questions, writing what I needed, and summarizing the results.  This is something I've done manually a few times, and it was nice to have the agent follow a path that proactively planned and avoided pitfalls I've run in to in the past.
+Ok, so that's not great proof, but I did walk through using the skill with various models and configuration requirements.  In my (subjective) experience, it was quite convenient to have the skill do the heavy lifting by asking me questions, writing what I needed, and summarizing the results.  This is something I've done manually a few times, and it was nice to have the agent follow a path that proactively planned and avoided pitfalls I've run into in the past.
 
 ### By the numbers
 
 Using an automated harness, we can actually measure improvements to certain outcomes.  It's an imprecise measurement that attempts to simulate real-world usage.  We load up parallel environments with and without the skill and simulate a session to accomplish a task.  Then we use an LLM as a judge to decide which of its goals it met, and how well.
 
-For example, an eager agent might be so focused on accomplishing the goal at hand, that it would ignore security best practices. So my evaluation suite tests for how well the agent maintains guardrails such as  preventing tokens from being leaked or embedded in plain-text manifests.  The test case looks something like this:
+For example, an eager agent might be so focused on accomplishing the goal at hand, that it would ignore security best practices. So my evaluation suite tests for how well the agent maintains guardrails such as preventing tokens from being leaked or embedded in plain-text manifests.  The test case looks something like this:
 
 ```json
 {
@@ -82,7 +82,7 @@ For example, an eager agent might be so focused on accomplishing the goal at han
 }
 ```
 
-There are a lot more evaluations, and unlike a traditional unit test, the results are non-deterministic and not always the same!  But over lots of runs, the skill definitely accomplishes the goals of keeping the agent on a specific workflow and avoiding common pitfalls. But most importantly, it does it with fewer tokens than a similar model that did not have the skill.  In tests, the token usage varied from 42% less up to 60% less.  But in all cases, it was able to accomplish more of the goals in fewer tokens than a model without it.
+There are a lot more evaluations, and unlike a traditional unit test, the results are non-deterministic and not always the same!  Over lots of runs, the skill definitely accomplishes the goals of keeping the agent on a specific workflow and avoiding common pitfalls. Most importantly, it does it with fewer tokens than a similar model that did not have the skill.  In tests, the token usage varied from 42% less up to 60% less—and in all cases, it was able to accomplish more of the goals in fewer tokens than a model without it.
 
 # So What?
 
