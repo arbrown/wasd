@@ -9,7 +9,18 @@ description = "The GKE AI Migration Skill provides a set of rails for Agents to 
 
 ![](/images/gke-ai-migration-skill/migration.jpg)
 
-I recently published [an opinionated skill](https://github.com/google/skills/blob/main/skills/cloud/google-cloud-solution-guided-gke-ai-migration/SKILL.md) for moving AI workloads from a serverless platform (like [Cloud Run](https://cloud.google.com/run?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog) or [Gemini Enterprise Agent Platform](https://cloud.google.com/products/agent-builder?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog)) to [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog). So what is it?  What isn't it?  Why a skill when models already know everything? 
+I created [a skill](https://github.com/google/skills/blob/main/skills/cloud/google-cloud-solution-guided-gke-ai-migration/SKILL.md) to save users 40-60% on token costs when migrating AI inference workloads from a serverless platform (like [Cloud Run](https://cloud.google.com/run?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog) or [Gemini Enterprise Agent Platform](https://cloud.google.com/products/agent-builder?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog)) to [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog). So what is it?  What isn't it?  Why a skill when models already know everything? 
+
+# When Would You Use It?
+
+## Manual Migrations
+The skill is great for setting up the infrastructure you need on GKE if you are already running AI inference on a different (more managed) platform on Google Cloud.  It includes pretty tightly scoped use cases where it is useful, with specific off-ramps where it is not applicable (for example, if the user wants to use a managed tool like [Gemini Cloud Assist](https://cloud.google.com/gemini/docs/cloud-assist/overview?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog) to accomplish the goal in a more hands off way.)
+
+## The Golden Path
+
+The skill has a few built-in opinions about how to host inference on GKE.  I baked those in as [bundled manifest templates](https://github.com/google/skills/tree/main/skills/cloud/google-cloud-solution-guided-gke-ai-migration/assets).  Why waste tokens on something if you don't have to? 😉 Of course, you can tell your agent to deviate from these, but they're a great place to start.
+
+The golden path has good presets for models of various sizes, and helps you set up your cluster for future success with features like [Custom Compute Classes](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-custom-compute-classes?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog), [Gateway API](https://cloud.google.com/kubernetes-engine/docs/concepts/gateway-api?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog), model staging on [Cloud Storage Buckets](https://cloud.google.com/storage?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog) and more.  It also helps users avoid some pitfalls like hard-coding secrets or picking the wrong metrics for autoscaling.
 
 # What is the GKE AI Migration Skill?
 
@@ -31,17 +42,6 @@ To keep the agent on track and set it up for success the first time, the skill e
 3. Implementation: Write the manifests, run `gcloud` commands to create the infrastructure, and `kubectl` commands to apply the manifests to the cluster.  This phase is the longest-running because it includes a lot of waiting for things to spin up, or sometimes jobs like staging a model in a storage bucket.
 
 4. Validation: Make sure the server is up (health checks) and that a quick inference check actually works.
-
-# When Would You Use It?
-
-## Manual Migrations
-The skill is great for setting up the infrastructure you need on GKE if you are already running AI inference on a different (more managed) platform on Google Cloud.  It includes pretty tightly scoped use cases where it is useful, with specific off-ramps where it is not applicable (for example, if the user wants to use a managed tool like [Gemini Cloud Assist](https://cloud.google.com/gemini/docs/cloud-assist/overview?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog) to accomplish the goal in a more hands off way.)
-
-## The Golden Path
-
-The skill has a few built-in opinions about how to host inference on GKE.  I baked those in as [bundled manifest templates](https://github.com/google/skills/tree/main/skills/cloud/google-cloud-solution-guided-gke-ai-migration/assets).  Why waste tokens on something if you don't have to? 😉 Of course, you can tell your agent to deviate from these, but they're a great place to start.
-
-The golden path has good presets for models of various sizes, and helps you set up your cluster for future success with features like [Custom Compute Classes](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-custom-compute-classes?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog), [Gateway API](https://cloud.google.com/kubernetes-engine/docs/concepts/gateway-api?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog), model staging on [Cloud Storage Buckets](https://cloud.google.com/storage?utm_campaign=CDR_0x145aeba1_default_b539587054&utm_medium=external&utm_source=blog) and more.  It also helps users avoid some pitfalls like hard-coding secrets or picking the wrong metrics for autoscaling.
 
 ## Why a skill?
 This is the part that I was most skeptical of when I started this project; models these days already seem to know everything, and can ingest up-to-date documentation when they don't.  So what does a skill add? My a-ha moment came when I realized that the skill wasn't about "what" but more about "how".  At one point, I had a hard-coded list of recommendations for VMs and accelerators, and storage options.  But that's not what a skill is useful for.  I had two main goals for the skill - increase chances of task success, and **decrease the number of tokens needed to get there**.  I believe this skill succeeds in both cases.
