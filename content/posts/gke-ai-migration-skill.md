@@ -61,9 +61,9 @@ Ok, so that's not great proof, but I did walk through using the skill with vario
 
 ### By the numbers
 
-Using an automated harness, we can actually measure improvements to certain outcomes.  It's an imprecise measurement that attempts to simulate real-world usage. The skill definitely accomplishes the goals of keeping the agent on a specific workflow and gathering the required information to avoid common pitfalls, but most importantly, it does it with fewer tokens than a similar model that did not have the skill.  In tests, the token usage varied from 42% less up to 60% less.  But in all cases, it was able to accomplish more of the goals in fewer tokens than a model without it.
+Using an automated harness, we can actually measure improvements to certain outcomes.  It's an imprecise measurement that attempts to simulate real-world usage.  We load up parallel environments with and without the skill and simulate a session to accomplish a task.  Then we use an LLM as a judge to decide which of its goals it met, and how well.
 
-For example, our evaluation suite tests for critical safety and reliability guardrails—such as preventing sensitive Hugging Face API tokens from being leaked to disk or embedded in plain-text manifests:
+For example, an eager agent might be so focused on accomplishing the goal at hand, that it would ignore security best practices. So my evaluation suite tests for how well the agent maintains guardrails such as  preventing tokens from being leaked or embedded in plain-text manifests.  The test case looks something like this:
 
 ```json
 {
@@ -81,6 +81,8 @@ For example, our evaluation suite tests for critical safety and reliability guar
   ]
 }
 ```
+
+There are a lot more evaluations, and unlike a traditional unit test, the results are non-deterministic and not always the same!  But over lots of runs, the skill definitely accomplishes the goals of keeping the agent on a specific workflow and avoiding common pitfalls. But most importantly, it does it with fewer tokens than a similar model that did not have the skill.  In tests, the token usage varied from 42% less up to 60% less.  But in all cases, it was able to accomplish more of the goals in fewer tokens than a model without it.
 
 # So What?
 
