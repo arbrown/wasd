@@ -1,6 +1,6 @@
 +++
 title = "The Wisdom of the Crowd: How to Steer AI Agents for Better Results"
-date = 2026-08-04T16:00:00-06:00
+date = 2026-08-04T12:00:00-06:00
 draft = false
 categories = ["AI and Machine Learning", "Software Engineering"]
 tags = ["ai", "agents", "llm", "coding", "prompt-engineering", "wisdom-of-the-crowd"]
