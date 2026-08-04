@@ -10,7 +10,18 @@ steps:
     args:
       - deploy
       - --target=storage_bucket
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'compute'
+      - 'url-maps'
+      - 'invalidate-cdn-cache'
+      - '$_URL_MAP_NAME'
+      - '--host=wasd.drewbrown.me'
+      - '--path=/*'
+      - '--async'
 options:
   logging: CLOUD_LOGGING_ONLY
 substitutions:
   _BUILDER_IMAGE: 'ghcr.io/gohugoio/hugo:latest'
+  _URL_MAP_NAME: 'wasd-blog-lb'
