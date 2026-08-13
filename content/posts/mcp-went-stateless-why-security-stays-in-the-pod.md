@@ -1,7 +1,7 @@
 +++
 title = "MCP Went Stateless - Why Security Stays in the Pod"
-date = 2026-08-13T12:00:00-06:00
-draft = true
+date = 2026-08-13T14:00:00-06:00
+draft = false
 categories = ["AI and Machine Learning", "Kubernetes"]
 tags = ["mcp", "kubernetes", "gke", "security", "ai", "agents", "llm"]
 description = "The Model Context Protocol went stateless in 2026-07-28, bringing header-based routing and simpler Kubernetes deployments. Here is why your authorization and security boundaries must still stay inside the pod."
@@ -13,7 +13,7 @@ Two weeks ago, Model Context Protocol shipped its [`2026-07-28`](https://modelco
 
 The biggest updates in this release are: no more stateful `initialize` handshake, `Mcp-Session-Id` headers have been retired, and every request is now completely self-contained.  
 
-Naturally, most of the conversation around this release focused on scaling: no sessions mean MCP servers can scale horizontally or even scale to zero with ease. That's great news if you're building serverless tools. But if you're deploying and managing MCP workloads on Kubernetes (or GKE), there are a couple other shifts that matter even more.
+Naturally, most of the conversation around this release focused on scaling: no sessions mean MCP servers can scale horizontally or even scale to zero with ease. That's great news if you're building serverless tools. But if you're deploying and managing MCP workloads on [Kubernetes](https://kubernetes.io/) (or [GKE](https://cloud.google.com/kubernetes-engine/docs?utm_campaign=CDR_0x145aeba1_default_b546141685&utm_medium=external&utm_source=blog)), there are a couple other shifts that matter even more.
 
 ---
 
@@ -23,7 +23,7 @@ Previously, running MCP servers behind Kubernetes services meant wrestling with 
 
 With the update, that operational headache vanishes. An MCP server is now an ordinary, garden-variety stateless HTTP workload. You write a standard `Deployment`, front it with a regular `Service`, and attach a standard Horizontal Pod Autoscaler.
 
-> **Quick Migration Tip:** If you're carrying forward Kubernetes manifests from the `2025-11-25` era, delete `sessionAffinity: ClientIP` from your Service definitions. Leaving it in now hurts even traffic distribution across your pods while buying you absolutely nothing in return.
+> **Quick Migration Tip:** If you're carrying forward Kubernetes manifests from the `2025-11-25` era, delete [`sessionAffinity: ClientIP`](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-affinity) from your Service definitions. Leaving it in now hurts even traffic distribution across your pods while buying you absolutely nothing in return.
 
 ---
 
@@ -31,7 +31,7 @@ With the update, that operational headache vanishes. An MCP server is now an ord
 
 While stateless scaling grabbed the headlines, the second major protocol enhancement is much quieter—and arguably more powerful for platform engineers.
 
-Under the Streamable HTTP transport, requests now require explicit `Mcp-Method` and `Mcp-Name` headers. On top of that, MCP tools can promote individual arguments into custom `Mcp-Param-*` headers. 
+Under the [Streamable HTTP transport](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports#streamable-http), requests now require explicit `Mcp-Method` and `Mcp-Name` headers. On top of that, MCP tools can promote individual arguments into custom `Mcp-Param-*` headers. 
 
 Why is this a big deal? Because any L7 proxy or ingress gateway can now inspect and route specific agent tool calls by name using headers, something that previously required a specialized tool like [AgentGateway](https://github.com/agentgateway/agentgateway) to parse the JSON request body.
 
@@ -46,9 +46,9 @@ Content-Type: application/json
 
 So what are some of the cool things this buys you if you're hosting an MCP server in your cluster?
 
-1. **Native Per-Tool Rate Limiting:** You can enforce per-tool quotas by matching headers directly on a Gateway API `HTTPRoute` with an attached rate-limit policy. No custom scripts, no lookups, and no external rate-limit filters digging `params.name` out of the JSON payload.
+1. **Native Per-Tool Rate Limiting:** You can enforce per-tool quotas by matching headers directly on a Gateway API [`HTTPRoute`](https://gateway-api.sigs.k8s.io/guides/user-guides/http-routing/) with an attached rate-limit policy. No custom scripts, no lookups, and no external rate-limit filters digging `params.name` out of the JSON payload.
 2. **Better Observability:** You can log tool calls at the infrastructure level using headers without having to log full JSON request bodies.
-3. **Smarter Autoscaling:** Autoscalers like KEDA's HTTP add-on can intercept and evaluate traffic based on headers alone, ensuring lightweight discovery calls don't unnecessarily wake heavy, scaled-to-zero tool pools.
+3. **Smarter Autoscaling:** Autoscalers like [KEDA's HTTP add-on](https://github.com/kedacore/http-add-on) can intercept and evaluate traffic based on headers alone, ensuring lightweight discovery calls don't unnecessarily wake heavy, scaled-to-zero tool pools.
 
 But what's one big gotcha that these headers don't actually solve?
 
@@ -70,7 +70,7 @@ Evaluating whether an agent *should* be allowed to execute a given tool call can
 
 ## The Downgrade Loophole: Why Edge Filtering Fails
 
-The SDK running in your pod *does* cross-check headers against the parsed JSON-RPC body to ensure a client can't fool a gateway by sending `Mcp-Name: safe_tool` in the header while requesting `drop_table` in the payload.
+The SDK running in your pod *does* cross-check headers against the parsed [JSON-RPC](https://www.jsonrpc.org/specification) body to ensure a client can't fool a gateway by sending `Mcp-Name: safe_tool` in the header while requesting `drop_table` in the payload.
 
 The real catch is the **backward compatibility window**. If a client declares an older protocol version or omits the version header altogether, the SDK skips header validation entirely:
 
@@ -126,11 +126,11 @@ But in either case, you still need to do full authorization and validation check
 
 ## But What About Managed Gateways?
 
-Google Cloud's [Agent Gateway](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/agent-gateway-overview) (not to be confused with the open-source [AgentGateway](https://github.com/agentgateway/agentgateway)) is worth knowing about, because it solves a problem HTTPRoute structurally can't: agent egress.
+Google Cloud's [Agent Gateway](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/agent-gateway-overview?utm_campaign=CDR_0x145aeba1_default_b546141685&utm_medium=external&utm_source=blog) (not to be confused with the open-source [AgentGateway](https://github.com/agentgateway/agentgateway)) is worth knowing about, because it solves a problem HTTPRoute structurally can't: agent egress.
 
-Kubernetes Gateway API is designed for routing incoming (North-South) traffic to your MCP server pods. But it has no awareness of outbound tool calls an agent makes, nor does it govern what an agent can reach outside the cluster. Furthermore, while GKE Workload Identity assigns IAM credentials at the *Pod* level, it doesn't distinguish between individual agent personas or workflows running inside it.
+[Kubernetes Gateway API](https://cloud.google.com/kubernetes-engine/docs/concepts/gateway-api?utm_campaign=CDR_0x145aeba1_default_b546141685&utm_medium=external&utm_source=blog) is designed for routing incoming (North-South) traffic to your MCP server pods. But it has no awareness of outbound tool calls an agent makes, nor does it govern what an agent can reach outside the cluster. Furthermore, while [GKE Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity?utm_campaign=CDR_0x145aeba1_default_b546141685&utm_medium=external&utm_source=blog) assigns IAM credentials at the *Pod* level, it doesn't distinguish between individual agent personas or workflows running inside it.
 
-Agent Gateway bridges this gap. It provides both **Client-to-Agent** (ingress) and **Agent-to-Anywhere** (egress) governance: giving each agent running on [Gemini Enterprise Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform) a distinct, trackable IAM principal and enforcing fine-grained access policies and security guardrails on every outbound request.
+Agent Gateway bridges this gap. It provides both **Client-to-Agent** (ingress) and **Agent-to-Anywhere** (egress) governance: giving each agent running on [Gemini Enterprise Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform?utm_campaign=CDR_0x145aeba1_default_b546141685&utm_medium=external&utm_source=blog) a distinct, trackable IAM principal and enforcing fine-grained access policies and security guardrails on every outbound request.
 
 ---
 
