@@ -1,6 +1,6 @@
 +++
 title = "MCP Went Stateless - Why Security Stays in the Pod"
-date = 2026-08-13T14:00:00-06:00
+date = 2026-08-13T13:15:00-06:00
 draft = false
 categories = ["AI and Machine Learning", "Kubernetes"]
 tags = ["mcp", "kubernetes", "gke", "security", "ai", "agents", "llm"]
