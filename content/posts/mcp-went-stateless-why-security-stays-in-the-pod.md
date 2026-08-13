@@ -124,9 +124,19 @@ But in either case, you still need to do full authorization and validation check
 
 ---
 
+## But What About Managed Gateways?
+
+Google Cloud's [Agent Gateway](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/agent-gateway-overview) (not to be confused with the open-source [AgentGateway](https://github.com/agentgateway/agentgateway)) is worth knowing about, because it solves a problem HTTPRoute structurally can't: agent egress.
+
+Kubernetes Gateway API is designed for routing incoming (North-South) traffic to your MCP server pods. But it has no awareness of outbound tool calls an agent makes, nor does it govern what an agent can reach outside the cluster. Furthermore, while GKE Workload Identity assigns IAM credentials at the *Pod* level, it doesn't distinguish between individual agent personas or workflows running inside it.
+
+Agent Gateway bridges this gap. It provides both **Client-to-Agent** (ingress) and **Agent-to-Anywhere** (egress) governance: giving each agent running on [Gemini Enterprise Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform) a distinct, trackable IAM principal and enforcing fine-grained access policies and security guardrails on every outbound request.
+
+---
+
 ## The Golden Rule
 
-The new MCP specification gives us incredible routing and observability tools, but architectural boundaries still apply:
+So the new MCP specification gives us incredible routing and observability tools for MCP servers running in GKE, but architectural boundaries still apply:
 
 > **Build routing and observability at the gateway. Build control in the pod.**
 
