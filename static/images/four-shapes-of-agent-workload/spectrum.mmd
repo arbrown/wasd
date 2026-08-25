@@ -1,0 +1,78 @@
+---
+config:
+  theme: base
+  flowchart:
+    rankSpacing: 22
+    nodeSpacing: 16
+    padding: 14
+  themeVariables:
+    background: '#ffffff'
+    primaryColor: '#ffffff'
+    lineColor: '#ffffff'
+    fontFamily: '"Comic Sans MS", "Chalkboard SE", cursive'
+    fontSize: 15px
+---
+%% One axis, not two. Every candidate for a second dimension (statefulness,
+%% credentials held, whose code is running) turned out to be caused by lifetime
+%% and therefore collapsed back onto this spine. Isolation need is the only
+%% attribute that runs off-trend -- it spikes at code execution and flattens --
+%% and one off-trend point is an exception, not a dimension. So isolation is
+%% called out as an annotation on two cells rather than drawn as a y-axis.
+%% NOTE: `look: handDrawn` is deliberately absent. It renders fills as rough.js
+%% hachure (cross-hatch) straight through the label text, and Mermaid has no
+%% knob to make those fills solid. Classic look + handwriting font instead.
+%% (A bare `%%` line is NOT a valid Mermaid comment -- it needs at least one
+%% character after the marker, or the parser eats the following newline.)
+%% Layout: three parallel horizontal chains of invisible (~~~) edges. In an LR
+%% flowchart each chain position is a rank (a column), and nodes sharing a rank
+%% stack vertically in DECLARATION order -- hence axis row, then cells, then
+%% annotations, declared in that order.
+flowchart LR
+
+  %% ---- row 1: the axis itself ----
+  AXL["◀ CHURN<br/>busy, short-lived"]
+  AXM1[" "]
+  AXM2[" "]
+  AXR["DENSITY ▶<br/>idle, long-lived"]
+
+  %% ---- row 2: the four shapes, in spine order ----
+  A["<b>Agentic RL loops</b><br/>seconds–minutes<br/><i>wall: teardown rate</i>"]
+  B["<b>Short-lived code exec</b><br/>seconds<br/><i>wall: cold start</i>"]
+  C["<b>Long-lived coding agents</b><br/>minutes–hours<br/><i>wall: held memory</i>"]
+  D["<b>Persistent assistants</b><br/>indefinite<br/><i>wall: idle cost</i>"]
+
+  %% ---- row 3: isolation, as annotation rather than axis ----
+  N1[" "]
+  N2["▲ hard boundary<br/>untrusted, multi-tenant"]
+  N3[" "]
+  N4["▲ identity scoping<br/>durable creds, real authority"]
+
+  %% ---- rank-forming chains (one per row) ----
+  AXL ~~~ AXM1 ~~~ AXM2 ~~~ AXR
+  A ~~~ B ~~~ C ~~~ D
+  N1 ~~~ N2 ~~~ N3 ~~~ N4
+
+  %% ---- styling ----
+  %% Cell fills are light tints of each mascot's hero colour, left to right in
+  %% the same order the post introduces them:
+  %%   A = mayflies (amber)  B = hummingbird (cyan)
+  %%   C = octopus (purple)  D = bear (warm brown)
+  classDef blank  fill:none,stroke:none,color:#ffffff
+  classDef axis   fill:none,stroke:none,color:#4b5563,font-weight:bold
+
+  classDef sfly   fill:#fdf0df,stroke:#d9821f,stroke-width:2.5px,color:#5a3305
+  classDef sbird  fill:#e2f8fc,stroke:#0f9fb2,stroke-width:2.5px,color:#0a3b44
+  classDef socto  fill:#efeafa,stroke:#7b5fb0,stroke-width:2.5px,color:#32215a
+  classDef sbear  fill:#f3e7dc,stroke:#8f5530,stroke-width:2.5px,color:#3f2311
+
+  classDef nbird  fill:none,stroke:none,color:#0f9fb2
+  classDef nbear  fill:none,stroke:none,color:#8f5530
+
+  class AXM1,AXM2,N1,N3 blank
+  class AXL,AXR axis
+  class A sfly
+  class B sbird
+  class C socto
+  class D sbear
+  class N2 nbird
+  class N4 nbear
