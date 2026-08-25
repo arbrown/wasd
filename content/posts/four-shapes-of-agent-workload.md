@@ -1,7 +1,7 @@
 +++
 title = "Four Shapes of Agent Workload (and Why Your Cluster Cares)"
 date = 2026-08-25T09:52:00-06:00
-draft = true
+draft = false
 categories = ["AI and Machine Learning", "Kubernetes"]
 tags = ["gke", "kubernetes", "ai", "agents", "agent-sandbox", "scaling", "security"]
 description = "\"Agent\" has become a catch-all word for anything with an LLM and a loop. Here are four very different workload shapes hiding underneath, where they land on the churn vs. density spectrum, and what your cluster actually needs to run them."
