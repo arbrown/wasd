@@ -56,6 +56,7 @@ locale = 'en-us'
   [[deployment.targets]]
     name = "storage_bucket"
     URL = "gs://wasd-blog"
+    exclude = "{downloads/**,files/**,**/*.pdf}"
 
 [markup]
   [markup.goldmark]
