@@ -1,6 +1,6 @@
 +++
 title = "Observability in the Agent Storybook Project: Adding Traces to ADK"
-date = 2026-09-16T11:35:00-06:00
+date = 2026-09-28T11:15:00-06:00
 draft = false
 categories = ["AI and Machine Learning", "Kubernetes", "Observability"]
 tags = ["gke", "kubernetes", "ai", "agents", "google-adk", "gemini", "opentelemetry", "cloud-trace", "observability", "asp"]
