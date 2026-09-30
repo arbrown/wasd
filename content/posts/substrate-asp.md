@@ -1,7 +1,7 @@
 +++
 title = "Isolating Agents in the Agent Storybook Project with Agent Substrate"
-date = 2026-09-29T15:10:00-06:00
-draft = true
+date = 2026-09-30T14:12:00-06:00
+draft = false
 categories = ["AI and Machine Learning", "Kubernetes"]
 tags = ["gke", "kubernetes", "ai", "agents", "google-adk", "agent-substrate", "agent-sandbox", "gvisor", "asp"]
 description = "Why running a multi-agent pipeline inside your web server is a bad idea, and how I used Agent Substrate and gVisor snapshots on GKE to give every storybook run its own isolated actor."
