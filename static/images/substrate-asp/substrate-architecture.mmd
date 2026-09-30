@@ -26,7 +26,7 @@ flowchart TB
         subgraph POOL ["🛡️ <b>gVisor WorkerPool (agent-workloads)</b>"]
             direction TB
             Snap(["📸 <b>Golden Snapshot</b><br/><i>Pre-warmed Python & ADK</i>"])
-            Actor1("📦 <b>Substrate Actor (Session A)</b><br/>🎭 11-Stage ADK Pipeline<br/><i>Restored in ~870ms</i>")
+            Actor1("📦 <b>Substrate Actor (Session A)</b><br/>🎭 11-Stage ADK Pipeline<br/><i>Restored in ~1s</i>")
             Actor2("📦 <b>Substrate Actor (Session B)</b><br/>🎭 11-Stage ADK Pipeline<br/><i>Isolated gVisor Sandbox</i>")
 
             Snap -.->|"Instant restore"| Actor1
