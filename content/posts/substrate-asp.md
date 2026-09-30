@@ -36,23 +36,11 @@ To fix this, I used **[Agent Substrate](https://github.com/agent-substrate/subst
 
 Instead of running the ADK pipeline inside FastAPI, each book generation now gets its own isolated **Substrate Actor** running in a gVisor sandbox:
 
-```
-User Browser ──(POST /sessions)──► FastAPI Gateway (replicas: 2)
-                                         │
-                                         ├──► 1. Writes initial state to GCS
-                                         └──► 2. Calls Agent Substrate (gRPC)
-                                                       │
-                                                       ▼
-                                         Restores Actor from Golden Snapshot (~870ms)
-                                         inside gVisor WorkerPool (agent-workloads)
-                                                       │
-                                                       ▼
-                                         Runs 11-stage ADK Pipeline & checkpoints to GCS
-```
+![Isolated Agent Substrate Actors on GKE](/images/substrate-asp/substrate-architecture.png)
 
 Here's why I like this pattern so much better than just spinning up a raw Kubernetes `Job` for every request:
 
-* **Fast startups with Golden Snapshots:** Cold-booting a new Python container and importing heavy libraries like `weasyprint`, `google-adk`, and `google-genai` takes almost 7 seconds. With Agent Substrate, we boot a runner container *once*, let it import everything, and take a memory snapshot (a **Golden Snapshot**). When a user requests a book, Substrate restores a fresh actor from that snapshot onto a warm worker pool in **~870ms**.
+* **Fast startups with Golden Snapshots:** Rather than having Kubernetes schedule a brand new Pod, pull layers, and boot the runtime from scratch for every single user request, all the expensive startup costs (container sandbox creation, Python runtime boot, and heavy module imports like `weasyprint` and `google-adk`) are **only paid once** when building the Golden Snapshot. When a user requests a book, Substrate restores a fresh actor from that snapshot onto a warm worker pool in **~1 second** (`resume_ms=1102.9ms`).
 * **Real isolation per run:** Each session runs in its own gVisor sandbox (`atespace: asp`, `name: <session_id>`) in a separate `agent-workloads` namespace, completely isolated from the FastAPI gateway and from other users' books.
 * **The web server is actually stateless now:** FastAPI just writes the initial config to GCS, asks Substrate to spawn the actor, and streams progress updates back to the browser. We can finally scale the backend to multiple replicas and deploy updates without killing active runs!
 
@@ -195,7 +183,15 @@ async def create_session(body: CreateSessionRequest) -> SessionResponse:
     return _to_session_response(state, is_running=True)
 ```
 
-Under the hood, `ate.create_actor()` is a thin gRPC wrapper in [`src/storybook/substrate/client.py`](https://github.com/arbrown/asp/pull/3/files) that creates the actor from the `asp-runner` template, attaches an egress policy, and resumes it onto a warm worker pod.
+Under the hood, `ate.create_actor()` is a thin gRPC wrapper in [`src/storybook/substrate/client.py`](https://github.com/arbrown/asp/pull/3/files) that creates the actor from the `asp-runner` template, attaches an egress policy, and resumes it onto a warm worker pod in the `asp-workerpool`.
+
+Because the Golden Snapshot already holds the initialized Python runtime and pre-imported dependencies in memory, all of those heavy startup costs are paid ahead of time when the template is created. Waking up an actor on a warm worker for a new user request happens in just over a second:
+
+```text
+Provisioned and resumed Substrate actor asp/b895518f-cb2b-4e78-98a4-ca0893de2067 from template asp-runner in 1108.0 ms (resume_ms=1102.9, state=ACTOR_STATE_RUNNING, worker_pod=asp-workerpool-7bfd485658-nwktc, resume=False)
+```
+
+The FastAPI gateway issues the gRPC call, Substrate maps the memory snapshot onto a worker pod, and within ~1,100ms the runner is unpaused and executing the session!
 
 ---
 
