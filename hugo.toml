@@ -63,6 +63,9 @@ locale = 'en-us'
     [markup.goldmark.renderer]
       unsafe = true
   [markup.highlight]
-    style = "monokai"
+    codeFences = true
+    guessSyntax = false
     lineNos = false
     noClasses = false
+    style = "gruvbox"
+    tabWidth = 2

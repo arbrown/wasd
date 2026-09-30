@@ -1,0 +1,62 @@
+---
+config:
+  theme: base
+  flowchart:
+    curve: basis
+    rankSpacing: 48
+    nodeSpacing: 38
+    padding: 16
+    wrappingWidth: 260
+  themeVariables:
+    background: '#ffffff'
+    primaryColor: '#ffffff'
+    lineColor: '#475569'
+    fontFamily: '"Comic Sans MS", "Chalkboard SE", cursive'
+    fontSize: 15px
+---
+flowchart TB
+    User(["👤 <b>Reader / Browser</b>"])
+
+    subgraph GKE ["☸️ <b>GKE Cluster</b>"]
+        direction TB
+
+        Gateway("🚀 <b>FastAPI Gateway</b><br/><i>Stateless API & SSE (2 replicas)</i>")
+        Substrate("⚡ <b>Agent Substrate</b><br/><i>Control Plane (gRPC)</i>")
+
+        subgraph POOL ["🛡️ <b>gVisor WorkerPool (agent-workloads)</b>"]
+            direction TB
+            Snap(["📸 <b>Golden Snapshot</b><br/><i>Pre-warmed Python & ADK</i>"])
+            Actor1("📦 <b>Substrate Actor (Session A)</b><br/>🎭 11-Stage ADK Pipeline<br/><i>Restored in ~1s</i>")
+            Actor2("📦 <b>Substrate Actor (Session B)</b><br/>🎭 11-Stage ADK Pipeline<br/><i>Isolated gVisor Sandbox</i>")
+
+            Snap -.->|"Instant restore"| Actor1
+            Snap -.->|"Instant restore"| Actor2
+        end
+
+        Gateway -->|"2. Create & resume actor"| Substrate
+        Substrate ==>|"3. Wake actor on warm pod"| Actor1
+    end
+
+    GCS[("🪣 <b>Cloud Storage (GCS)</b><br/>Session state, progress events<br/>& finished PDFs")]
+
+    User -->|"1. POST /sessions"| Gateway
+    Gateway -->|"1. Save initial state"| GCS
+    Actor1 -->|"4. Checkpoint stages & spreads"| GCS
+    GCS -.->|"5. Stream SSE progress"| Gateway
+
+    classDef userStyle fill:#EFF6FF,stroke:#3B82F6,stroke-width:2.5px,color:#1E3A8A;
+    classDef gwStyle fill:#F0FDFA,stroke:#0D9488,stroke-width:2.5px,color:#134E4A;
+    classDef subStyle fill:#EEF2FF,stroke:#4F46E5,stroke-width:2.5px,color:#312E81;
+    classDef snapStyle fill:#FDF4FF,stroke:#C026D3,stroke-width:2px,stroke-dasharray: 5 3,color:#701A75;
+    classDef actorStyle fill:#ECFDF5,stroke:#10B981,stroke-width:2.5px,color:#064E3B;
+    classDef gcsStyle fill:#FEF3C7,stroke:#D97706,stroke-width:2.5px,color:#78350F;
+
+    class User userStyle;
+    class Gateway gwStyle;
+    class Substrate subStyle;
+    class Snap snapStyle;
+    class Actor1,Actor2 actorStyle;
+    class GCS gcsStyle;
+
+    style GKE fill:#F8FAFC,stroke:#0284C7,stroke-width:2px,rx:12,ry:12;
+    style POOL fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px,stroke-dasharray: 6 4,rx:10,ry:10;
