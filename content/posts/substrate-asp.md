@@ -10,9 +10,9 @@ description = "Why running a multi-agent pipeline inside your web server is a ba
 <!-- TODO: Hero image -->
 <!-- ![](/images/substrate-asp/hero.png) -->
 
-In the [first post](/posts/introducing-agent-storybook-project/) of this series, I introduced the [Agent Storybook Project (ASP)](https://github.com/arbrown/asp)—an open-source multi-agent system on [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b559176373&utm_medium=external&utm_source=blog) that adapts public-domain classics into illustrated children's books. Last time, we [instrumented the whole thing with OpenTelemetry](/posts/observability-asp/) to find and fix a bunch of hidden bottlenecks in the agent loop.
+In the [first post](/posts/introducing-agent-storybook-project/) of this series, I introduced the [Agent Storybook Project (ASP)](https://github.com/arbrown/asp)—an open-source multi-agent system on [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b558682677&utm_medium=external&utm_source=blog) that adapts public-domain classics into illustrated children's books. Last time, I [instrumented the whole thing with OpenTelemetry](/posts/observability-asp/) to find and fix hidden bottlenecks in the agent loop.
 
-Now it's time to tackle the #1 item from my original "Future Improvements" list: **getting the agents out of the web server!**
+This time, I'm making an architectural shift and isolating the agentic part from the backend that orchestrates it.  For this, I'm using [Agent Substrate](https://github.com/agent-substrate/substrate) to manage the agents.  This gives us a few important benefits.  First, it isolates each agent from the web server so a crash in one won't take down the other.  Second, it lets us start up (and as a bonus, resume!) agent workloads from a golden snapshot.  This matters more for large-scale agents that are starting from a known point thousands of times in a row, like for [RL training](/posts/intro-rl-sandbox/).
 
 I just put up two new PRs on the repo: [one that moves pipeline runs into isolated Agent Substrate actors](https://github.com/arbrown/asp/pull/3), and a [follow-up PR that adds crash detection and checkpoint recovery](https://github.com/arbrown/asp/pull/4). Let's look at why the original setup needed to change, and what it takes to get [Agent Substrate](https://github.com/agent-substrate/substrate) up and running in a project like this.
 
@@ -20,13 +20,19 @@ I just put up two new PRs on the repo: [one that moves pipeline runs into isolat
 
 ## Before: Everything in One Pod (Why That Was a Bad Idea)
 
-When I built the first prototype of the Storybook Project, I took the easiest path possible to get it working: when you clicked "Generate" in the UI, the FastAPI backend just kicked off the 11-stage [ADK](https://github.com/google/adk-python) pipeline right there in the same process using `asyncio.create_task()`.
+When I built the first prototype of the Storybook Project, I took the path of least resistanceto get it working; just shove everything in the same process (at one point, even the frontend was serving from there!)
 
-That's fine for a weekend demo, but pretty terrible for a real application:
+1. **The backend API and the agents were sharing a process:** 
 
-1. **The UI and the agents were sharing a process:** While a lot of the pipeline is waiting on Gemini calls, it also does real work—pulling full books from Project Gutenberg, validating bursts of high-res illustrations, and compiling print-ready PDFs with WeasyPrint. Running all of that inside the same Python event loop that serves the UI means one heavy book build can bog down the web server for everyone else.
-2. **In-memory state locked us to a single pod:** Active sessions and progress queues lived in Python dictionaries (`_sessions`, `_queues`, `_tasks`) right inside the FastAPI process. That meant we were stuck at `replicas: 1`. Worse, if I pushed a tiny CSS or API fix and Kubernetes rolled the backend pod, every in-flight book generation was unceremoniously killed mid-story.
-3. **Zero isolation between agent runs:** Every user's storybook session ran in the exact same container with the same filesystem and memory space. Right now the agents only call pre-defined tools, but as I give them more autonomy (like writing custom code to lay out a tricky page), I *really* want each agent locked in its own [gVisor sandbox](https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods?utm_campaign=CDR_0x145aeba1_default_b559176373&utm_medium=external&utm_source=blog) so one weird run can't mess with another—or with the web server itself.
+The backend API should be a way to start a book generation, but it doesn't necessarily need to coordinate every step of the process.  What if one agent eventually does something unexpected and crashes?  What if eventually the composition process is so computationally expensive that it takes down a run (after fighting with Gemini enough on this, I'm convinced that storybook layout in [NP-hard](https://en.wikipedia.org/wiki/NP-hardness))?  I don't want that to bring down every other run.  It's best to isolate the agents from the other parts of the stack.
+
+2. **In-memory state locked us to a single pod:** 
+
+Active sessions and progress queues lived in Python dictionaries (`_sessions`, `_queues`, `_tasks`) right inside the FastAPI process. That meant we were stuck at `replicas: 1`. Worse, if I pushed a tiny CSS or API fix and Kubernetes rolled the backend pod, every in-flight book generation was unceremoniously killed mid-story.
+
+3. **Zero isolation between agent runs:** 
+
+Every user's storybook session ran in the exact same container with the same filesystem and memory space. Right now the agents only call pre-defined tools, but as I give them more autonomy (like writing custom code to lay out a tricky page), I *really* want each agent locked in its own [gVisor sandbox](https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods?utm_campaign=CDR_0x145aeba1_default_b558682677&utm_medium=external&utm_source=blog) so one weird run can't mess with another—or with the web server itself.
 
 ---
 
@@ -34,15 +40,13 @@ That's fine for a weekend demo, but pretty terrible for a real application:
 
 To fix this, I used **[Agent Substrate](https://github.com/agent-substrate/substrate)** to split the web backend from the actual agent work.
 
-Instead of running the ADK pipeline inside FastAPI, each book generation now gets its own isolated **Substrate Actor** running in a gVisor sandbox:
+Agent Substrate introduces the concept of an Actor to manage the lifecycle of your agent.  I am only scratching the surface of what you can use this pattern for; it can also be used to stack multiple (like even thousands) of agents on to a single Node through clever snapshotting and restoration, and to auto-resume an agent using a gateway to [hold an incoming request](https://github.com/agent-substrate/substrate/tree/main/demos/parking) until the right actor is up and running and ready to receive it.
+
+Instead of running the ADK pipeline inside FastAPI, each book generation now gets its own isolated Substrate Actor running in a gVisor sandbox:
 
 ![Isolated Agent Substrate Actors on GKE](/images/substrate-asp/substrate-architecture.png)
 
-Here's why I like this pattern so much better than just spinning up a raw Kubernetes `Job` for every request:
-
-* **Fast startups with Golden Snapshots:** Rather than having Kubernetes schedule a brand new Pod, pull layers, and boot the runtime from scratch for every single user request, all the expensive startup costs (container sandbox creation, Python runtime boot, and heavy module imports like `weasyprint` and `google-adk`) are **only paid once** when building the Golden Snapshot. When a user requests a book, Substrate restores a fresh actor from that snapshot onto a warm worker pool in **~1 second** (`resume_ms=1102.9ms`).
-* **Real isolation per run:** Each session runs in its own gVisor sandbox (`atespace: asp`, `name: <session_id>`) in a separate `agent-workloads` namespace, completely isolated from the FastAPI gateway and from other users' books.
-* **The web server is actually stateless now:** FastAPI just writes the initial config to GCS, asks Substrate to spawn the actor, and streams progress updates back to the browser. We can finally scale the backend to multiple replicas and deploy updates without killing active runs!
+I like this pattern better than just spinning up a raw Kubernetes `Job` for every request.
 
 ---
 
@@ -147,7 +151,7 @@ async def _async_main() -> int:
     return await execute_session(session_id=session_id)
 ```
 
-*(Note that `random.seed(os.urandom(16))` call after restore—if you restore multiple actors from the same memory snapshot without re-seeding the random number generator, they all wake up with the exact same RNG state! Ask me how I know 😏.)*
+*(Note that `random.seed(os.urandom(16))` call after restore—if you restore multiple actors from the same memory snapshot without re-seeding the random number generator, they all wake up with the exact same RNG state! Ask me how I know* 😏*.)*
 
 ---
 
@@ -183,9 +187,9 @@ async def create_session(body: CreateSessionRequest) -> SessionResponse:
     return _to_session_response(state, is_running=True)
 ```
 
-Under the hood, `ate.create_actor()` is a thin gRPC wrapper in [`src/storybook/substrate/client.py`](https://github.com/arbrown/asp/pull/3/files) that creates the actor from the `asp-runner` template, attaches an egress policy, and resumes it onto a warm worker pod in the `asp-workerpool`.
+Under the hood, `ate.create_actor()` is a thin gRPC wrapper in [`src/storybook/substrate/client.py`](https://github.com/arbrown/asp/pull/3/files) that creates the actor from the `asp-runner` template, attaches an egress policy, and resumes it onto a warm worker pod in the `asp-workerpool`.  I had Gemini write me a client SDK because Substrate is so new there isn't a ready-made one for Python (yet!)
 
-Because the Golden Snapshot already holds the initialized Python runtime and pre-imported dependencies in memory, all of those heavy startup costs are paid ahead of time when the template is created. Waking up an actor on a warm worker for a new user request happens in just over a second:
+Because the Golden Snapshot already holds the initialized Python runtime and pre-imported dependencies in memory, all of those heavy startup costs are paid ahead of time when the template is created. Waking up an actor on a warm worker for a new user request happens in about a second (though this is with a naive setup. I think I could get it even faster!):
 
 ```text
 Provisioned and resumed Substrate actor asp/b895518f-cb2b-4e78-98a4-ca0893de2067 from template asp-runner in 1108.0 ms (resume_ms=1102.9, state=ACTOR_STATE_RUNNING, worker_pod=asp-workerpool-7bfd485658-nwktc, resume=False)
@@ -200,13 +204,13 @@ The FastAPI gateway issues the gRPC call, Substrate maps the memory snapshot ont
 Once the agent pipeline was decoupled from the web server, a bunch of resilience improvements in [PR #4](https://github.com/arbrown/asp/pull/4) fell into place naturally:
 
 * **Surviving backend rollouts:** Because actors write their progress events to GCS (`GCSProgressSink`) and the SSE stream uses event sequence numbers (`Last-Event-ID`), I scaled `storybook-backend` up to `replicas: 2`. Now if a backend pod restarts while you're watching a book build, the browser automatically reconnects to the other replica without losing its place—and the actor never even notices.
-* **Detecting crashed actors & resuming mid-book:** Since Substrate tracks the lifecycle of every actor, the backend can check `ate.get_actor()` while streaming. If an actor crashes mid-run, the UI immediately surfaces a "Resume" button that spins up a brand-new actor, loads the completed stages and spreads from GCS checkpoints, and picks up right where the old actor left off.
+* **Detecting crashed actors & resuming mid-book:** Since Substrate tracks the lifecycle of every actor, the backend can check `ate.get_actor()` while streaming. If an actor crashes mid-run, the UI immediately surfaces a "Resume" button that spins up a brand-new actor, loads the completed stages and spreads from GCS checkpoints, and picks up right where the old actor left off.  So far I've only tested this by force-crashing a pod in the middle of a run, but it does work!  I can't wait (?) to see this happen for some unknown crash reason!
 
 ---
 
 ## What's Next
 
-We now have full OpenTelemetry tracing *and* isolated, snapshot-restored actors for every storybook run! Next up on my list is adding multi-user authentication (so everyone doesn't share one global bookshelf) and breaking out individual tool calls into their own scalable services.
+We now have full OpenTelemetry tracing *and* isolated, snapshot-restored actors for every storybook run!  I have a bunch [more ideas](/posts/introducing-agent-storybook-project/#future-improvements) for how to improve this agent and make it more enterprise-ready 😉.
 
 Keep an eye on the [asp](/tags/asp/) tag for the next update, and feel free to check out the code or open an issue on the [GitHub repo](https://github.com/arbrown/asp)!
 
@@ -215,8 +219,9 @@ Keep an eye on the [asp](/tags/asp/) tag for the next update, and feel free to c
 ## Helpful Links
 
 * [Agent Substrate on GitHub](https://github.com/agent-substrate/substrate)
+* [Agent Substrate on GKE](https://docs.cloud.google.com/kubernetes-engine/ai-ml/about-agent-substrate?utm_campaign=CDR_0x145aeba1_default_b558682677&utm_medium=external&utm_source=blog)
 * [Agent Storybook Project GitHub Repository](https://github.com/arbrown/asp) ([PR #3: Substrate Actors](https://github.com/arbrown/asp/pull/3), [PR #4: Resilience & Checkpoint Resume](https://github.com/arbrown/asp/pull/4))
 * [Part 1: Introducing Agent Storybook Project](/posts/introducing-agent-storybook-project/)
 * [Part 2: Observability in the Agent Storybook Project](/posts/observability-asp/)
 * [Four Shapes of Agent Workload (and Why Your Cluster Cares)](/posts/four-shapes-of-agent-workload/)
-* [GKE Agent Sandbox Documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/agent-sandbox?utm_campaign=CDR_0x145aeba1_default_b559176373&utm_medium=external&utm_source=blog)
+* [GKE Agent Sandbox Documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/agent-sandbox?utm_campaign=CDR_0x145aeba1_default_b558682677&utm_medium=external&utm_source=blog)
