@@ -1,6 +1,6 @@
 +++
 title = "Multi-User Isolation in the Agent Storybook Project with OAuth and Downscoped Tokens"
-date = 2026-10-21T13:45:00-06:00
+date = 2026-10-21T14:45:00-06:00
 draft = true
 categories = ["AI and Machine Learning", "Kubernetes", "Security"]
 tags = ["gke", "kubernetes", "ai", "agents", "google-adk", "agent-substrate", "iap", "oauth", "iam", "gcs", "asp"]
@@ -11,21 +11,27 @@ description = "Moving from one giant communal bucket of storybooks to per-user w
 ![From one chaotic communal pile to personal bookshelves](/images/oauth-asp/hero.jpg)
 
 
-In the [first post](/posts/introducing-agent-storybook-project/) of this series, I introduced the [Agent Storybook Project (ASP)](https://github.com/arbrown/asp), an open-source multi-agent system on [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b570650429&utm_medium=external&utm_source=blog) that adapts public-domain classics into illustrated children's books. Since then, I've [instrumented the pipeline with OpenTelemetry](/posts/observability-asp/) to find and fix hidden bottlenecks, and [moved each book run into its own isolated Agent Substrate actor](/posts/substrate-asp/) restored from a golden snapshot.
+Let's update [my GKE agent](/posts/introducing-agent-storybook-project/) with one of my original goals: separate users!
 
-That solved compute isolation, but it left item #2 from my original [Future Improvements](/posts/introducing-agent-storybook-project/#future-improvements) list wide open: **multi-user authentication and storage isolation**. Even though every storybook generation ran in its own [gVisor-sandboxed](https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods?utm_campaign=CDR_0x145aeba1_default_b570650429&utm_medium=external&utm_source=blog) actor, all users were still walking through the exact same unauthenticated front door and dumping their books into one giant communal bucket.
+I planned this way back in the [original post](/posts/introducing-agent-storybook-project/#future-improvements). I already updated the original agent to run each workload in its own [gVisor-sandboxed](https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods?utm_campaign=CDR_0x145aeba1_default_b570650429&utm_medium=external&utm_source=blog) actor, but all users were still walking through the exact same unauthenticated front door and dumping their books into one giant communal bucket.
 
-I just merged [PR #5](https://github.com/arbrown/asp/pull/5), which puts Google OAuth in front of the app with [Identity-Aware Proxy (IAP)](https://cloud.google.com/iap/docs/enabling-kubernetes-howto?utm_campaign=CDR_0x145aeba1_default_b570650429&utm_medium=external&utm_source=blog) and gives each session a short-lived, downscoped [Cloud Storage](https://cloud.google.com/storage?utm_campaign=CDR_0x145aeba1_default_b570650429&utm_medium=external&utm_source=blog) token using [IAM Credential Access Boundaries (CAB)](https://cloud.google.com/iam/docs/downscoping-short-lived-credentials?utm_campaign=CDR_0x145aeba1_default_b570650429&utm_medium=external&utm_source=blog). Let's look at how it works, a fun wrinkle with passing per-session tokens into snapshot-restored actors, and why scoping storage is only half the battle for true agent identity.
+I just merged [the multi-user milestone](https://github.com/arbrown/asp/pull/5), which puts Google OAuth in front of the app with [Identity-Aware Proxy (IAP)](https://cloud.google.com/iap/docs/enabling-kubernetes-howto?utm_campaign=CDR_0x145aeba1_default_b570650429&utm_medium=external&utm_source=blog) and gives each session a short-lived, downscoped [Cloud Storage](https://cloud.google.com/storage?utm_campaign=CDR_0x145aeba1_default_b570650429&utm_medium=external&utm_source=blog) token using [IAM Credential Access Boundaries (CAB)](https://cloud.google.com/iam/docs/downscoping-short-lived-credentials?utm_campaign=CDR_0x145aeba1_default_b570650429&utm_medium=external&utm_source=blog).  This accomplishes a couple of things:
+
+* Users have to log in to use the application (sorry, we're not in GA yet, so logins are limited to me and a few trusted testers! 😉)
+
+* Each user has their own set of storybook projects and cannot write to each other's folder or see each other's projects
+
+Let's look at how it works, a fun wrinkle with passing per-session tokens into snapshot-restored actors, and why scoping storage is only half the battle for true agent identity.
 
 ---
 
 ## Before: One Giant Communal Bucket of Books
 
-When you build a quick prototype for yourself, multi-tenancy is usually a "later" problem. Well, it's later! Here is what was broken in the original setup:
+It was easy enough to build out a prototype that was only for me, but once I hosted it on GKE and started getting teammates to test it, it was definitely time to isolate users' data.  Here's what was broken:
 
-1. **Zero authentication at the front door:** Anyone with the URL could kick off a book generation (burning my Gemini quota 😅), browse every past run on the History page, or cancel and resume someone else's session.
+1. **Zero authentication at the front door:** Anyone with the URL could kick off a book generation.  In practice, this didn't happen, but security through obscurity is not really a long-term plan.
 2. **A single flat storage namespace (`sessions/{session_id}/`):** Every user's prompts, intermediate JSON checkpoints, generated illustrations, and final PDFs lived in the same shared GCS hierarchy.
-3. **Over-privileged storage clients:** Every Substrate Actor initialized its GCS client using the ambient `storybook-backend` service account, which had full `roles/storage.objectAdmin` across the entire bucket. A path-handling bug in one session's runner had full permissions to read or overwrite any other user's storybooks.
+3. **Over-privileged storage clients:** Every Substrate Actor initialized its GCS client using the ambient `storybook-backend` service account, which had full `roles/storage.objectAdmin` across the entire bucket. A path-handling bug in one session's runner had full permissions to read or overwrite any other user's storybooks and build artifacts (I'm keeping every build artifact like images, character bible, etc... who knows how valuable they will be in a future version of the agent!)
 
 ---
 
@@ -38,11 +44,7 @@ To turn ASP into something multiple people can actually use at the same time, I 
 
 ![OAuth and STS Credential Access Boundary flow](/images/oauth-asp/oauth-cab-architecture.png)
 
-<!--
-OPTIONAL SCREENSHOT IDEA (UI / IAP Login or Scoped History):
-- Concept: A screenshot showing the Google OAuth IAP sign-in screen or the Storybook UI displaying only the logged-in user's personal bookshelf/history.
-- Suggested placement: `/images/oauth-asp/iap-history.png`
--->
+![Logging in to the Agent Storybook Server](/images/oauth-asp/iap-history.png)
 
 ---
 
@@ -50,9 +52,7 @@ OPTIONAL SCREENSHOT IDEA (UI / IAP Login or Scoped History):
 
 ### 1. Identifying the User Behind GKE IAP (`auth.py`)
 
-One of my favorite things about running on GKE is how little code it takes to turn on IAP. In `k8s/backend-config.yaml`, it's literally five lines pointing at your OAuth client secret—plus a `timeoutSec: 3600` setting so the load balancer doesn't cut off our Server-Sent Events (SSE) progress stream mid-book:
-
-*(From [`k8s/backend-config.yaml`](https://github.com/arbrown/asp/pull/5/files))*
+Adding IAP to a service running on GKE is super easy. In `k8s/backend-config.yaml`:
 
 ```yaml
 apiVersion: cloud.google.com/v1
@@ -68,7 +68,7 @@ spec:
       secretName: storybook-iap-secret
 ```
 
-*(Pro tip: if you put a Google Cloud Load Balancer and IAP in front of an SSE endpoint, raising `timeoutSec` isn't quite enough on its own—if an LLM stage goes quiet for a minute, proxies still love to drop idle connections. I also had to add a `: keepalive\n\n` SSE comment heartbeat every second in [`routes.py`](https://github.com/arbrown/asp/pull/5/files) to keep the stream alive!)*
+*(Pro tip: if you put a Google Cloud Load Balancer and IAP in front of an SSE endpoint, raising `timeoutSec` isn't quite enough on its own—if an LLM stage goes quiet for a minute, proxies still love to drop idle connections. I also added `: keepalive\n\n` SSE comment heartbeat every second in [`routes.py`](https://github.com/arbrown/asp/pull/5/files) to keep the stream alive!) I noticed this issue when I stopped getting live updates in the UI during storybook generation after I added IAP *
 
 Once IAP is active, Google's proxy authenticates the user and passes `X-Goog-Authenticated-User-Email: accounts.google.com:user@example.com` to the backend. In [`src/storybook/api/auth.py`](https://github.com/arbrown/asp/blob/main/src/storybook/api/auth.py), we parse that header, sanitize the email so it's safe to use in GCS object paths (`alice@example.com` $\rightarrow$ `alice_at_example.com`), and inject `AuthenticatedUser` into our FastAPI routes with `Depends(get_current_user)`:
 
@@ -125,7 +125,7 @@ async def get_current_user(
 
 ### 2. Minting a Per-Session Downscoped GCS Token (`iam.py`)
 
-When a user starts (or resumes) a book generation, the runner only has business touching objects inside that single session's folder.
+When a user starts (or resumes) a book generation, the runner should only touch objects inside that session's folder.  
 
 Instead of creating separate IAM service accounts for every user, we can use an STS **[Credential Access Boundary (CAB)](https://cloud.google.com/iam/docs/downscoping-short-lived-credentials?utm_campaign=CDR_0x145aeba1_default_b570650429&utm_medium=external&utm_source=blog)**. We build a rule with a [CEL expression](https://cloud.google.com/iam/docs/conditions-overview#cel?utm_campaign=CDR_0x145aeba1_default_b570650429&utm_medium=external&utm_source=blog) (`resource.name.startsWith(...)`) that confines `roles/storage.objectUser` strictly to `projects/_/buckets/{bucket}/objects/users/{safe_user}/sessions/{session_id}/`, and exchange our backend's ambient credentials at `https://sts.googleapis.com/v1/token`:
 
@@ -215,7 +215,7 @@ OPTIONAL DIAGRAM / ILLUSTRATION IDEA #3 (Golden Snapshot Credential Handoff):
 - Suggested placement: `/images/oauth-asp/snapshot-token-handoff.png`
 -->
 
-My first instinct was to pass `ASP_USER_EMAIL` and `GCS_DOWNSCOPED_TOKEN` as environment variables or annotations on the `CreateActor` gRPC request. Except... the Python process inside the snapshot is already running! Even if you could mutate container startup env vars after the fact, `os.environ` was initialized when the Golden Snapshot was taken. And Substrate's `systemInfo` metadata volume intentionally only exposes system fields (`actor-name`, `actor-atespace`, and `actor-uid`).
+My first instinct was to pass `ASP_USER_EMAIL` and `GCS_DOWNSCOPED_TOKEN` as environment variables or annotations on the `CreateActor` gRPC request. Except... the Python process inside the snapshot is already running thanks to our [Substrate golden image](/posts/substrate-asp/)! Even if you could mutate container startup env vars after the fact, `os.environ` was initialized when the Golden Snapshot was taken. And Substrate's `systemInfo` metadata volume intentionally only exposes system fields (`actor-name`, `actor-atespace`, and `actor-uid`).
 
 To bridge the gap, FastAPI stashes the short-lived downscoped token in `rqlite` right before waking the actor. When the restored actor wakes up and reads its assigned `session_id` from `/run/ate/metadata/actor-name`, it pulls `(user_email, downscoped_token)` for that session and configures its GCS client with `OAuth2Credentials(token=resolved_token)`:
 
@@ -254,19 +254,11 @@ Right now, that's completely fine because our agents only execute our own determ
 
 To get **true per-agent and per-user identity**, the sandboxed actor shouldn't have ambient Workload Identity or direct database access at all—credentials and tool execution need to be brokered *outside* the untrusted sandbox.
 
-<!--
-OPTIONAL ILLUSTRATION IDEA #4 (Shared Worker Identity vs. Brokered Agent Identity):
-- Concept: Humorous illustration of a security guard handing a guest a "Room 402 Only" keycard while a giant keyring labeled "Master Building Keys (169.254.169.254)" is still hanging on a hook inside the room.
-- Suggested placement: `/images/oauth-asp/master-keys.jpg`
--->
-
 ---
 
 ## What's Next
 
-Piece by piece, our weekend storybook prototype is starting to look like a real cloud-native agent platform: we have [OpenTelemetry tracing](/posts/observability-asp/), [snapshot-restored gVisor sandboxes with crash recovery](/posts/substrate-asp/), and now multi-user OAuth login with per-session downscoped storage tokens!
-
-Next up, I want to tackle decoupling tool execution from the main agent runtime—and exploring what it looks like to give agents real, least-privilege identity without leaving ambient credentials lying around inside the sandbox.
+Piece by piece, my weekend storybook prototype is starting to look like a real cloud-native agent platform: we have [OpenTelemetry tracing](/posts/observability-asp/), [snapshot-restored gVisor sandboxes with crash recovery](/posts/substrate-asp/), and now multi-user OAuth login with per-session downscoped storage tokens!
 
 Keep an eye on the [asp](/tags/asp/) tag for the next update, and check out the code or open an issue on the [GitHub repo](https://github.com/arbrown/asp)!
 
