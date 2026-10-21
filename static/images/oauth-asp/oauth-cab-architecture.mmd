@@ -1,0 +1,72 @@
+---
+config:
+  theme: base
+  flowchart:
+    curve: basis
+    rankSpacing: 52
+    nodeSpacing: 42
+    padding: 18
+    wrappingWidth: 280
+  themeVariables:
+    background: '#ffffff'
+    primaryColor: '#ffffff'
+    lineColor: '#475569'
+    fontFamily: '"Comic Sans MS", "Chalkboard SE", cursive'
+    fontSize: 15px
+---
+flowchart TB
+    User(["👤 <b>Reader / Browser</b><br/><i>alice@example.com</i>"])
+
+    IAP("🔐 <b>GKE Ingress + IAP</b><br/>Google OAuth Login<br/><i>Injects X-Goog-Authenticated-User-Email</i>")
+
+    subgraph GKE ["☸️ <b>GKE Cluster</b>"]
+        direction TB
+
+        Gateway("🚀 <b>FastAPI Backend</b><br/><i>Scopes rqlite queries to user</i>")
+        Substrate("⚡ <b>Agent Substrate</b><br/><i>Control Plane (gRPC)</i>")
+
+        subgraph POOL ["🛡️ <b>gVisor WorkerPool (Shared WI Service Account)</b>"]
+            direction LR
+            ActorA("📦 <b>Substrate Actor (Alice: abc)</b><br/>🎭 11-Stage ADK Pipeline<br/><i>Downscoped OAuth2Credentials</i>")
+            ActorB("📦 <b>Substrate Actor (Bob: xyz)</b><br/>🎭 11-Stage ADK Pipeline<br/><i>Isolated gVisor Sandbox</i>")
+        end
+
+        Gateway -->|"3. Save token & wake actor"| Substrate
+        Substrate ==>|"4. Restore / run actor"| ActorA
+    end
+
+    STS("🎟️ <b>Google Cloud STS</b><br/><i>mint_session_downscoped_token()</i><br/>Applies Credential Access Boundary (CAB)")
+
+    subgraph GCS ["🪣 <b>Cloud Storage Bucket (Shared)</b>"]
+        direction LR
+        AlicePrefix["✅ <b>users/alice_at_example.com/sessions/abc/*</b><br/><i>roles/storage.objectUser allowed</i>"]
+        BobPrefix["🚫 <b>users/bob_at_example.com/sessions/xyz/*</b><br/><i>403 Forbidden by CAB rule</i>"]
+    end
+
+    User -->|"1. HTTPS + Google OAuth"| IAP
+    IAP -->|"1. Verified user header"| Gateway
+    Gateway <-->|"2. Exchange ambient SA token<br/>for prefix-scoped CAB token"| STS
+    ActorA -->|"5. Read / write checkpoints & PDFs"| AlicePrefix
+    ActorA -.->|"❌ Blocked by STS CAB"| BobPrefix
+
+    classDef userStyle fill:#EFF6FF,stroke:#3B82F6,stroke-width:2.5px,color:#1E3A8A;
+    classDef iapStyle fill:#FEF2F2,stroke:#EF4444,stroke-width:2.5px,color:#7F1D1D;
+    classDef gwStyle fill:#F0FDFA,stroke:#0D9488,stroke-width:2.5px,color:#134E4A;
+    classDef subStyle fill:#EEF2FF,stroke:#4F46E5,stroke-width:2.5px,color:#312E81;
+    classDef stsStyle fill:#FDF4FF,stroke:#C026D3,stroke-width:2.5px,color:#701A75;
+    classDef actorStyle fill:#ECFDF5,stroke:#10B981,stroke-width:2.5px,color:#064E3B;
+    classDef allowStyle fill:#DCFCE7,stroke:#16A34A,stroke-width:2.5px,color:#14532D;
+    classDef denyStyle fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,stroke-dasharray: 5 3,color:#7F1D1D;
+
+    class User userStyle;
+    class IAP iapStyle;
+    class Gateway gwStyle;
+    class Substrate subStyle;
+    class STS stsStyle;
+    class ActorA,ActorB actorStyle;
+    class AlicePrefix allowStyle;
+    class BobPrefix denyStyle;
+
+    style GKE fill:#F8FAFC,stroke:#0284C7,stroke-width:2px,rx:12,ry:12;
+    style POOL fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px,stroke-dasharray: 6 4,rx:10,ry:10;
+    style GCS fill:#FEF3C7,stroke:#D97706,stroke-width:2.5px,rx:12,ry:12;
