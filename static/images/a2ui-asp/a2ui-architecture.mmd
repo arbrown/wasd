@@ -1,0 +1,70 @@
+---
+config:
+  theme: base
+  flowchart:
+    curve: basis
+    rankSpacing: 46
+    nodeSpacing: 38
+    padding: 16
+    wrappingWidth: 250
+  themeVariables:
+    background: '#ffffff'
+    primaryColor: '#ffffff'
+    lineColor: '#475569'
+    fontFamily: '"Comic Sans MS", "Chalkboard SE", cursive'
+    fontSize: 15px
+---
+flowchart TB
+    subgraph SURFACES ["🪟 <b>Multiple User Surfaces</b>"]
+        direction LR
+        WebUI(["🖥️ <b>Standalone React SPA</b><br/><i>Custom Web Studio (REST + SSE)</i>"])
+        GE(["✨ <b>Gemini on the web</b><br/><i>Gemini for business</i><br/><i>Native A2UI v0.9 Renderer</i>"])
+    end
+
+    subgraph GKE ["☸️ <b>GKE Cluster (Single Agent Backend)</b>"]
+        direction TB
+
+        Ingress("🌐 <b>GKE Ingress</b><br/>Routes <code>/</code>, <code>/api</code> (IAP) &amp; <code>/a2a</code>, <code>/.well-known</code>")
+
+        FastAPI("🚀 <b>FastAPI REST + SSE</b><br/><code>/api/sessions</code>")
+        A2ARouter("🤝 <b>A2A + A2UI Router</b><br/><code>message/stream</code><br/><i>application/json+a2ui</i>")
+
+        Substrate("⚡ <b>Agent Substrate</b><br/><i>Control Plane (gRPC)</i>")
+
+        subgraph POOL ["🛡️ <b>gVisor WorkerPool (Shared Agent Runtime)</b>"]
+            direction LR
+            Actor("📦 <b>Substrate Actor</b><br/>🎭 11-Stage ADK Storybook Pipeline<br/><i>Restored from Golden Snapshot</i>")
+        end
+
+        Ingress -->|"1a. OAuth / IAP"| FastAPI
+        Ingress -->|"1b. A2A JSON-RPC + SSE"| A2ARouter
+        FastAPI -->|"2. Create / wake actor"| Substrate
+        A2ARouter -->|"2. Create / wake actor"| Substrate
+        Substrate ==>|"3. Restore & run"| Actor
+    end
+
+    GCS[("🪣 <b>Cloud Storage (GCS)</b><br/>Shared checkpoints, progress events,<br/>spread images &amp; final PDFs")]
+
+    WebUI -->|"HTTPS + IAP"| Ingress
+    GE <-->|"A2A + A2UI Envelopes<br/>(MultipleChoice, Cards, Button)"| Ingress
+    Actor <-->|"4. Read / write checkpoints, spreads & PDFs"| GCS
+
+    classDef surfaceStyle fill:#EFF6FF,stroke:#3B82F6,stroke-width:2.5px,color:#1E3A8A;
+    classDef geStyle fill:#FDF4FF,stroke:#C026D3,stroke-width:2.5px,color:#701A75;
+    classDef ingStyle fill:#FEF2F2,stroke:#EF4444,stroke-width:2.5px,color:#7F1D1D;
+    classDef gwStyle fill:#F0FDFA,stroke:#0D9488,stroke-width:2.5px,color:#134E4A;
+    classDef subStyle fill:#EEF2FF,stroke:#4F46E5,stroke-width:2.5px,color:#312E81;
+    classDef actorStyle fill:#ECFDF5,stroke:#10B981,stroke-width:2.5px,color:#064E3B;
+    classDef gcsStyle fill:#FEF3C7,stroke:#D97706,stroke-width:2.5px,color:#78350F;
+
+    class WebUI surfaceStyle;
+    class GE geStyle;
+    class Ingress ingStyle;
+    class FastAPI,A2ARouter gwStyle;
+    class Substrate subStyle;
+    class Actor actorStyle;
+    class GCS gcsStyle;
+
+    style SURFACES fill:#F8FAFC,stroke:#64748B,stroke-width:2px,stroke-dasharray: 6 4,rx:12,ry:12;
+    style GKE fill:#F8FAFC,stroke:#0284C7,stroke-width:2px,rx:12,ry:12;
+    style POOL fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px,stroke-dasharray: 6 4,rx:10,ry:10;
