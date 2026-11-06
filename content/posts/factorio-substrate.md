@@ -8,6 +8,8 @@ tags = ["factorio", "gaming", "gke", "gcp", "kubernetes", "agent-substrate", "gv
 description = "Running stateful, UDP-based Factorio game servers as on-demand, auto-suspending Agent Substrate Actors on GKE with multi-world multiplexing and scale-to-zero Spot nodes."
 +++
 
+![The factory must grow... and sleep!](/images/factorio-substrate/factorio-substrate.png)
+
 ## Revisiting the Original Factorio on GKE Wishlist
 
 Last year I wrote about one of my favorite games of all time, [Factorio](https://factorio.com/), and [hosting a dedicated server on GKE](/posts/factorio-gke-spot/). It was an okay solution, though far from optimal—it relied on `CronJob`s to turn the server on at 5 PM and off at midnight—but it served me and my friends over the course of a long campaign before I retired that cluster. At the very end of that post, I left a wishlist item:
@@ -17,8 +19,6 @@ Last year I wrote about one of my favorite games of all time, [Factorio](https:/
 Now that my friends and I are looking to dust off our Factorio server and start a new 2.1 campaign, that got me thinking: how would I revisit this solution today with better tools? Lately I've been spending a lot of time with **[Agent Substrate](https://github.com/agent-substrate/substrate)** on [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) (like in my [Agent Storybook Project](/posts/substrate-asp/)). Substrate was originally designed with AI agents, code interpreters, and RL environments in mind, but at its core, it's great at managing *any* stateful workload that needs fast checkpointing and restore.
 
 Factorio seemed like a great candidate because holding onto the game server state is critical, and we want it to hibernate when nobody is online and resume very quickly when players connect. So that got me thinking: is this actually a good fit, or am I just reaching here?
-
-![Factorio + Agent Substrate](/images/factorio-substrate/factorio-substrate.png)
 
 ## Can a Factorio Server Be an Agent Substrate Actor?
 
