@@ -540,7 +540,7 @@ pre code {
 .chroma .gs { font-weight: bold; }
 .chroma .gt { color: #ff6b6b; font-weight: bold; }
 
-/* Figure and Image Styles */
+/* Figure, Image, and Video Styles */
 figure,
 .image-figure {
   margin: 1.8em 0;
@@ -552,9 +552,12 @@ figure,
 }
 
 figure img,
-.image-figure img {
+.image-figure img,
+figure video,
+.image-figure video {
   max-width: 100%;
   height: auto;
+  display: block;
   border-radius: 8px;
   border: 1px solid var(--card-border);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
@@ -565,6 +568,11 @@ figure img:hover,
 .image-figure img:hover {
   border-color: var(--primary-orange);
   transform: scale(1.01);
+}
+
+figure video:hover,
+.image-figure video:hover {
+  border-color: var(--primary-orange);
 }
 
 figure figcaption,

@@ -233,6 +233,8 @@ And breaking down that current configuration item by item:
 
 With all that said, it's time to show off our fresh, multiplexed, multi-world Factorio server running on GKE and Agent Substrate.
 
+{{< video src="/downloads/factorio-substrate/blog_option1_side_by_side_stack.mp4" caption="Swapping between Factorio worlds on a single GKE worker pod" >}}
+
 As you can see, the first time I connect to `:34197`, it wakes up `world-vanilla` (and generates its custom map on the very first boot), and we can run around in it and make changes—or even run `make prove` ([`hack/prove-e2e.sh`](https://github.com/arbrown/factorio-substrate/blob/main/hack/prove-e2e.sh)) to drop a steel chest with 42 red science packs right at spawn—and then disconnect and connect to `:34198` (`world-deathworld`), which saves and evicts the first world to Cloud Storage and loads the second world onto the exact same worker pod.
 
 When we connect back to the original world on `:34197`, our changes persist and the world resumes from Cloud Storage nearly instantaneously (~1.5 seconds). And once everyone disconnects, after 10 minutes of silence the Actor suspends to GCS, 2 minutes later the `WorkerPool` scales to `0`, and GKE removes the Spot worker node from the cluster so I stop paying for it.
