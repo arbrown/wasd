@@ -1,7 +1,7 @@
 +++
 title = "The Factory Must Sleep: On-Demand Factorio Worlds with Agent Substrate on GKE"
-date = 2026-11-05T15:15:19-07:00
-draft = true
+date = 2026-11-06T14:15:00-07:00
+draft = false
 images = ["/images/factorio-substrate/factorio-substrate.png"]
 categories = ["Projects", "Kubernetes"]
 tags = ["factorio", "gaming", "gke", "gcp", "kubernetes", "agent-substrate", "gvisor", "tutorial"]
@@ -16,13 +16,15 @@ Last year I wrote about one of my favorite games of all time, [Factorio](https:/
 
 > *If I could add one feature, it would be the on-demand scaling up and down as we connect and disconnect from the server. I haven't cracked that bit yet, and I figure that the single-digit dollars it would save me are probably not worth spending too much time thinking about. But if you've got a solution, I'd love to hear it!*
 
-Now that my friends and I are looking to dust off our Factorio server and start a new 2.1 campaign, that got me thinking: how would I revisit this solution today with better tools? Lately I've been spending a lot of time with **[Agent Substrate](https://github.com/agent-substrate/substrate)** on [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) (like in my [Agent Storybook Project](/posts/substrate-asp/)). Substrate was originally designed with AI agents, code interpreters, and RL environments in mind, but at its core, it's great at managing *any* stateful workload that needs fast checkpointing and restore.
+Now that my friends and I are looking to dust off our Factorio server and start a new 2.1 campaign, that got me thinking: how would I revisit this solution today with better tools? Lately I've been spending a lot of time with **[Agent Substrate](https://github.com/agent-substrate/substrate)** on [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b582834957&utm_medium=external&utm_source=blog) (like in my [Agent Storybook Project](/posts/substrate-asp/)). Substrate was originally designed with AI agents, code interpreters, and RL environments in mind, but at its core, it's great at managing *any* stateful workload that needs fast checkpointing and restore.
 
 Factorio seemed like a great candidate because holding onto the game server state is critical, and we want it to hibernate when nobody is online and resume very quickly when players connect. So that got me thinking: is this actually a good fit, or am I just reaching here?
 
+{{< video src="/downloads/factorio-substrate/factorio-belt-gag.mp4" width="40%" autoplay="true" loop="true" muted="true" controls="false" >}}
+
 ## Can a Factorio Server Be an Agent Substrate Actor?
 
-So what exactly is a Substrate Actor? At its core, an Actor is a sandboxed workload that we can turn on and off on demand and have it resume right where it left off in about a second. For an intermittently used multiplayer game server, that sounds ideal. We give Substrate an `ActorTemplate` ([`manifests/factorio-template.yaml.tmpl`](https://github.com/arbrown/factorio-substrate/blob/main/manifests/factorio-template.yaml.tmpl)) that builds a pre-warmed **Golden Snapshot** of the server, have it write save files to a persistent `durableDir` volume (`/factorio`), and configure `SNAPSHOT_CONTENT_SCOPE_FULL` so both the `/factorio` directory and the entire [gVisor](https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) sandbox memory state get shipped off to Cloud Storage whenever the server is suspended—letting us stop paying for compute when nobody is playing.
+So what exactly is a [Substrate Actor](https://docs.cloud.google.com/kubernetes-engine/ai-ml/about-agent-substrate?utm_campaign=CDR_0x145aeba1_default_b582834957&utm_medium=external&utm_source=blog)? At its core, an Actor is a sandboxed workload that we can turn on and off on demand and have it resume right where it left off in about a second. For an intermittently used multiplayer game server, that sounds ideal. We give Substrate an `ActorTemplate` ([`manifests/factorio-template.yaml.tmpl`](https://github.com/arbrown/factorio-substrate/blob/main/manifests/factorio-template.yaml.tmpl)) that builds a pre-warmed **Golden Snapshot** of the server, have it write save files to a persistent `durableDir` volume (`/factorio`), and configure `SNAPSHOT_CONTENT_SCOPE_FULL` so both the `/factorio` directory and the entire [gVisor](https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods?utm_campaign=CDR_0x145aeba1_default_b582834957&utm_medium=external&utm_source=blog) sandbox memory state get shipped off to [Cloud Storage](https://cloud.google.com/storage?utm_campaign=CDR_0x145aeba1_default_b582834957&utm_medium=external&utm_source=blog) whenever the server is suspended—letting us stop paying for compute when nobody is playing.
 
 On the surface, this even opens up the possibility of hosting *multiple* Factorio worlds on the exact same hardware. As long as only one world is active at a time, we can keep the rest of them hibernated in Cloud Storage and multiplex a single worker pod across all of them.
 
@@ -39,11 +41,11 @@ The core of the solution is a pair of lightweight Go binaries:
 
 To make sure Factorio can tell multiple connected players apart, every WebSocket binary frame prefixes the raw UDP payload with the player's source `IP:port` ([`internal/tunnelproto/frame.go`](https://github.com/arbrown/factorio-substrate/blob/main/internal/tunnelproto/frame.go#L57-L89)), and the sidecar allocates a dedicated local ephemeral UDP socket (`127.0.0.1:<port_i>`) per player ([`cmd/factorio-sidecar/main.go`](https://github.com/arbrown/factorio-substrate/blob/main/cmd/factorio-sidecar/main.go#L460-L504)). And because `atenet-router` enforces a 5-minute Envoy route timeout, the gateway transparently rotates the WebSocket connection every 4 minutes while the sidecar keeps those local UDP sockets open across rotations.
 
-![Factorio Gateway and Sidecar UDP-over-WebSocket Architecture](/images/factorio-substrate/gateway-sidecar.svg)
+![Factorio Gateway and Sidecar UDP-over-WebSocket Architecture](/images/factorio-substrate/gateway-sidecar.gif)
 
 ## Multi-World Multiplexing on a Single Worker Pod
 
-Once the UDP-over-WebSocket bridge was working, it opened up a lot of fun possibilities. Rather than having a single Factorio world tied to a dedicated Persistent Disk, we can host multiple worlds at the same IP address and switch between them just by changing the port number we connect to in the Factorio client:
+Once the UDP-over-WebSocket bridge was working, it opened up a lot of fun possibilities. Rather than having a single Factorio world tied to a dedicated [Persistent Disk](https://cloud.google.com/kubernetes-engine/docs/concepts/persistent-volumes?utm_campaign=CDR_0x145aeba1_default_b582834957&utm_medium=external&utm_source=blog), we can host multiple worlds at the same IP address and switch between them just by changing the port number we connect to in the Factorio client:
 
 * **`:34197` (`factorio/world-vanilla`)** — Super-Dense Megabase 
 * **`:34198` (`factorio/world-deathworld`)** — Deathworld
@@ -54,7 +56,7 @@ You could add as many as you want, and swap between them just by changing port (
 
 {{< video src="/downloads/factorio-substrate/blog_option1_side_by_side_stack.mp4" caption="Swapping between Factorio worlds on a single GKE worker pod" >}}
 
-All four worlds share a **single** [1-replica `WorkerPool` pod](https://github.com/arbrown/factorio-substrate/blob/main/manifests/factorio-substrate.yaml.tmpl#L50-L80)). When you connect to `:34198` while `world-vanilla` is sitting idle on the worker pod, the gateway automatically calls `/prepare-suspend` on `world-vanilla`'s sidecar (which runs an RCON `/server-save` over `127.0.0.1:27015`), calls `SuspendActor` to ship `world-vanilla`'s memory and save file to Cloud Storage, and wakes `world-deathworld` into [the *exact same* worker pod in a couple of seconds](https://github.com/arbrown/factorio-substrate/blob/main/cmd/factorio-gateway/main.go#L896-L937)).
+All four worlds share a **single** [1-replica `WorkerPool` pod](https://github.com/arbrown/factorio-substrate/blob/main/manifests/factorio-substrate.yaml.tmpl#L50-L80). When you connect to `:34198` while `world-vanilla` is sitting idle on the worker pod, the gateway automatically calls `/prepare-suspend` on `world-vanilla`'s sidecar (which runs an RCON `/server-save` over `127.0.0.1:27015`), calls `SuspendActor` to ship `world-vanilla`'s memory and save file to Cloud Storage, and wakes `world-deathworld` into [the *exact same* worker pod in a couple of seconds](https://github.com/arbrown/factorio-substrate/blob/main/cmd/factorio-gateway/main.go#L896-L937).
 
 Meanwhile, the sleeping worlds sit silently in Cloud Storage as compressed `zstd` archives (~46 MB per world, or ~250 MB total for all four worlds plus the Golden Snapshot)—which works out to **less than a penny a month** in storage costs—and wake back up nearly instantly whenever someone connects.
 
@@ -65,13 +67,15 @@ Finally, I decided to tackle a true Scale-to-Zero setup using Substrate and GKE.
 To eliminate that idle worker cost, `factorio-gateway` runs a two-stage idle reaper ([`idleReaperLoop` in `cmd/factorio-gateway/main.go`](https://github.com/arbrown/factorio-substrate/blob/main/cmd/factorio-gateway/main.go#L1376-L1443)):
 
 1. **10-minute Actor idle timeout (`--idle-timeout=10m`):** While a world is `RUNNING`, the gateway tracks **outbound Factorio UDP replies** (`lastOutboundReply`—so random internet UDP scanners can't keep the server awake!). After 10 minutes with zero Factorio replies, the gateway triggers an RCON `/server-save` and calls `SuspendActor` to freeze the world to Cloud Storage.
-2. **2-minute WorkerPool scale-to-zero (`--workerpool-idle-timeout=2m`):** Once *all* worlds have been `SUSPENDED` for 2 minutes, the gateway calls the in-cluster Kubernetes API to patch `WorkerPool/factorio` from `replicas: 1` down to `replicas: 0` ([`maybeScaleDownWorkerPool`](https://github.com/arbrown/factorio-substrate/blob/main/cmd/factorio-gateway/main.go#L858-L894)). With the worker pod gone (and the `atelet` DaemonSet marked `safe-to-evict: "true"`), GKE's Cluster Autoscaler (`--autoscaling-profile=optimize-utilization`) removes the `n2-standard-2` Spot worker node completely.
+2. **2-minute WorkerPool scale-to-zero (`--workerpool-idle-timeout=2m`):** Once *all* worlds have been `SUSPENDED` for 2 minutes, the gateway calls the in-cluster Kubernetes API to patch `WorkerPool/factorio` from `replicas: 1` down to `replicas: 0` ([`maybeScaleDownWorkerPool`](https://github.com/arbrown/factorio-substrate/blob/main/cmd/factorio-gateway/main.go#L858-L894)). With the worker pod gone (and the `atelet` DaemonSet marked `safe-to-evict: "true"`), [GKE's Cluster Autoscaler](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler?utm_campaign=CDR_0x145aeba1_default_b582834957&utm_medium=external&utm_source=blog) (`--autoscaling-profile=optimize-utilization`) removes the `n2-standard-2` [Spot worker node](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x145aeba1_default_b582834957&utm_medium=external&utm_source=blog) completely.
 
 The next time someone sends a Factorio UDP connection request, `activateWorld` scales `WorkerPool/factorio` back from `0` to `1` ([`ensureWorkerPoolScaledUp`](https://github.com/arbrown/factorio-substrate/blob/main/cmd/factorio-gateway/main.go#L822-L856)). That first cold connect takes ~60–90 seconds while GKE provisions a fresh Spot node, and once the node is up, switching between any of the four worlds is back to ~1.5 seconds.
 
 *(From [`cmd/factorio-gateway/main.go`](https://github.com/arbrown/factorio-substrate/blob/main/cmd/factorio-gateway/main.go#L822-L894) and [`idleReaperLoop`](https://github.com/arbrown/factorio-substrate/blob/main/cmd/factorio-gateway/main.go#L1376-L1443))*
 
-So... it's not perfect, we could warm the pool with a webhook from Discord, or maybe a simple Cloud Run service, but all things considered, it seems like an OK tradeoff.  And it's worked every time I've tested it so far!
+So... it's not perfect, we could warm the pool with a webhook from Discord, or maybe a simple [Cloud Run](https://cloud.google.com/run?utm_campaign=CDR_0x145aeba1_default_b582834957&utm_medium=external&utm_source=blog) service, but all things considered, it seems like an OK tradeoff.  And it's worked every time I've tested it so far!
+
+
 
 ```go
 if st == WorldStateRunning {
@@ -100,6 +104,8 @@ if allSuspended && !gw.upgradeInProgress.Load() {
 }
 ```
 
+{{< video src="/downloads/factorio-substrate/factorio-fish-gag.mp4" width="40%" autoplay="true" loop="true" muted="true" controls="false" >}}
+
 Combined with a few other infrastructure tweaks in [`hack/setup-cost-optimized-pools.sh`](https://github.com/arbrown/factorio-substrate/blob/main/hack/setup-cost-optimized-pools.sh)—running the lightweight Substrate control plane and `factorio-gateway` on a single `e2-medium` Spot node, rightsizing the default Postgres volume (`10Gi`), and using direct node `hostPort`s instead of a LoadBalancer—the economics change completely. Running an always-on game server cluster on GKE 24/7 is just too expensive for a hobby project, but with Agent Substrate and scale-to-zero Spot nodes, it's roughly **97% cheaper** and scales effortlessly—making it basically free to host dozens (or more) of Factorio worlds on demand (rough `us-central1` estimates):
 
 | Setup | Monthly Idle | Active Rate | ~20 hrs/mo Total | Summary |
@@ -115,7 +121,7 @@ Let's watch that demo video again, and dive in to what exactly is happening.
 
 As you can see, the first time I connect to `:34197`, it wakes up `world-vanilla` and we can run around in it and make changes then disconnect and connect to `:34198` (`world-deathworld`), which saves and evicts the first world to Cloud Storage and loads the second world onto the exact same worker pod.  Since this is the first time we've connected to `world-deathworld` it plays the animation for starting a new game.
 
-Then we connect back to the original world on `:34197`, and the world resumes from Cloud Storage nearly instantaneously (~1.5 seconds) and all our changes are still there.Once everyone disconnects, after 10 minutes of silence the Actor suspends to GCS, 2 minutes later the `WorkerPool` scales to `0`, and GKE removes the Spot worker node from the cluster so I stop paying for it.
+Then we connect back to the original world on `:34197`, and the world resumes from Cloud Storage nearly instantaneously (~1.5 seconds) and all our changes are still there. Once everyone disconnects, after 10 minutes of silence the Actor suspends to GCS, 2 minutes later the `WorkerPool` scales to `0`, and GKE removes the Spot worker node from the cluster so I stop paying for it.
 
 ## Check Out the Code
 
