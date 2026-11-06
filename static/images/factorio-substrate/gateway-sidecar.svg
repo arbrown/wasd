@@ -1,0 +1,596 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" width="1120" height="560" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">Factorio Gateway and Sidecar UDP-over-WebSocket Architecture</title>
+  <desc id="diagram-desc">Factorio-themed architecture diagram showing bidirectional UDP traffic on yellow transport belts from the Factorio Client into the GKE Cluster Gateway, converting to an auto-cycled WebSocket connection across the boundary into the Substrate Actor (stylized Assembling Machine) where a Sidecar converts it back to UDP for the Factorio Server, while other worlds hibernate in GCS Steel Chests.</desc>
+
+  <defs>
+    <!-- Standard SVG 1.1 Drop Shadow for Factorio machines -->
+    <filter id="shadow" x="-10%" y="-10%" width="124%" height="128%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
+      <feOffset in="blur" dx="0" dy="4" result="offsetBlur" />
+      <feComponentTransfer in="offsetBlur" result="shadowAlpha">
+        <feFuncA type="linear" slope="0.55" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="shadowAlpha" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="soft-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Hazard stripe pattern for Factorio boundaries -->
+    <pattern id="hazard-stripes" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="8" height="16" fill="#d99b26" />
+      <rect x="8" width="8" height="16" fill="#231f1c" />
+    </pattern>
+
+    <!-- Gradients for Factorio Metals -->
+    <linearGradient id="chest-top-rib" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8b93a2" />
+      <stop offset="35%" stop-color="#e8eff7" />
+      <stop offset="65%" stop-color="#d2dbe6" />
+      <stop offset="100%" stop-color="#697180" />
+    </linearGradient>
+
+    <linearGradient id="chest-front-rib" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#353942" />
+      <stop offset="45%" stop-color="#646b77" />
+      <stop offset="100%" stop-color="#2e3138" />
+    </linearGradient>
+
+    <linearGradient id="chest-rim-v" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c4cdd8" />
+      <stop offset="50%" stop-color="#868f9b" />
+      <stop offset="100%" stop-color="#5d646f" />
+    </linearGradient>
+
+    <linearGradient id="chest-front-pillar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8c94a0" />
+      <stop offset="65%" stop-color="#5e646e" />
+      <stop offset="100%" stop-color="#4e463e" />
+    </linearGradient>
+
+    <linearGradient id="assembler-frame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#48505c" />
+      <stop offset="50%" stop-color="#323842" />
+      <stop offset="100%" stop-color="#22262e" />
+    </linearGradient>
+
+    <linearGradient id="combinator-frame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#524638" />
+      <stop offset="50%" stop-color="#3a3126" />
+      <stop offset="100%" stop-color="#262018" />
+    </linearGradient>
+
+    <linearGradient id="factorio-orange" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff9e3b" />
+      <stop offset="100%" stop-color="#d96b00" />
+    </linearGradient>
+
+    <!-- Single Yellow Belt Chevron pointing RIGHT (centered vertically at y=12, width=16) -->
+    <g id="chev-r">
+      <polygon points="2,5.2 10,5.2 16.5,12 10,18.8 2,18.8 8.5,12" fill="#f5c400" stroke="#3d2e00" stroke-width="1.1" stroke-linejoin="round" />
+      <polygon points="3.5,6.3 9.2,6.3 14.5,12 12.6,12 8.2,7.6 3.5,7.6" fill="#ffe875" />
+    </g>
+
+    <!-- Single Yellow Belt Chevron pointing LEFT (centered vertically at y=12, width=16) -->
+    <g id="chev-l">
+      <polygon points="16,5.2 8,5.2 1.5,12 8,18.8 16,18.8 9.5,12" fill="#f5c400" stroke="#3d2e00" stroke-width="1.1" stroke-linejoin="round" />
+      <polygon points="14.5,6.3 8.8,6.3 3.5,12 5.4,12 9.8,7.6 14.5,7.6" fill="#ffe875" />
+    </g>
+
+    <!-- 136px Yellow Transport Belt Moving RIGHT (6 chevrons) -->
+    <g id="yellow-belt-right-136">
+      <rect x="0" y="0" width="136" height="24" rx="2" fill="#2c3035" stroke="#16181b" stroke-width="1.5" />
+      <line x1="22" y1="3.5" x2="22" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="44" y1="3.5" x2="44" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="66" y1="3.5" x2="66" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="88" y1="3.5" x2="88" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="110" y1="3.5" x2="110" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <rect x="0" y="0" width="136" height="3.8" fill="#858e99" stroke="#16181b" stroke-width="1" />
+      <rect x="0" y="20.2" width="136" height="3.8" fill="#858e99" stroke="#16181b" stroke-width="1" />
+      <use href="#chev-r" x="4" y="0" />
+      <use href="#chev-r" x="26" y="0" />
+      <use href="#chev-r" x="48" y="0" />
+      <use href="#chev-r" x="70" y="0" />
+      <use href="#chev-r" x="92" y="0" />
+      <use href="#chev-r" x="114" y="0" />
+    </g>
+
+    <!-- 136px Yellow Transport Belt Moving LEFT (6 chevrons) -->
+    <g id="yellow-belt-left-136">
+      <rect x="0" y="0" width="136" height="24" rx="2" fill="#2c3035" stroke="#16181b" stroke-width="1.5" />
+      <line x1="22" y1="3.5" x2="22" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="44" y1="3.5" x2="44" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="66" y1="3.5" x2="66" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="88" y1="3.5" x2="88" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="110" y1="3.5" x2="110" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <rect x="0" y="0" width="136" height="3.8" fill="#858e99" stroke="#16181b" stroke-width="1" />
+      <rect x="0" y="20.2" width="136" height="3.8" fill="#858e99" stroke="#16181b" stroke-width="1" />
+      <use href="#chev-l" x="4" y="0" />
+      <use href="#chev-l" x="26" y="0" />
+      <use href="#chev-l" x="48" y="0" />
+      <use href="#chev-l" x="70" y="0" />
+      <use href="#chev-l" x="92" y="0" />
+      <use href="#chev-l" x="114" y="0" />
+    </g>
+
+    <!-- 180px Yellow Transport Belt Moving RIGHT (8 chevrons) -->
+    <g id="yellow-belt-right-180">
+      <rect x="0" y="0" width="180" height="24" rx="2" fill="#2c3035" stroke="#16181b" stroke-width="1.5" />
+      <line x1="22" y1="3.5" x2="22" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="44" y1="3.5" x2="44" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="66" y1="3.5" x2="66" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="88" y1="3.5" x2="88" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="110" y1="3.5" x2="110" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="132" y1="3.5" x2="132" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="154" y1="3.5" x2="154" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <rect x="0" y="0" width="180" height="3.8" fill="#858e99" stroke="#16181b" stroke-width="1" />
+      <rect x="0" y="20.2" width="180" height="3.8" fill="#858e99" stroke="#16181b" stroke-width="1" />
+      <use href="#chev-r" x="4" y="0" />
+      <use href="#chev-r" x="26" y="0" />
+      <use href="#chev-r" x="48" y="0" />
+      <use href="#chev-r" x="70" y="0" />
+      <use href="#chev-r" x="92" y="0" />
+      <use href="#chev-r" x="114" y="0" />
+      <use href="#chev-r" x="136" y="0" />
+      <use href="#chev-r" x="158" y="0" />
+    </g>
+
+    <!-- 180px Yellow Transport Belt Moving LEFT (8 chevrons) -->
+    <g id="yellow-belt-left-180">
+      <rect x="0" y="0" width="180" height="24" rx="2" fill="#2c3035" stroke="#16181b" stroke-width="1.5" />
+      <line x1="22" y1="3.5" x2="22" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="44" y1="3.5" x2="44" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="66" y1="3.5" x2="66" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="88" y1="3.5" x2="88" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="110" y1="3.5" x2="110" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="132" y1="3.5" x2="132" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <line x1="154" y1="3.5" x2="154" y2="20.5" stroke="#1e2024" stroke-width="1.5" />
+      <rect x="0" y="0" width="180" height="3.8" fill="#858e99" stroke="#16181b" stroke-width="1" />
+      <rect x="0" y="20.2" width="180" height="3.8" fill="#858e99" stroke="#16181b" stroke-width="1" />
+      <use href="#chev-l" x="4" y="0" />
+      <use href="#chev-l" x="26" y="0" />
+      <use href="#chev-l" x="48" y="0" />
+      <use href="#chev-l" x="70" y="0" />
+      <use href="#chev-l" x="92" y="0" />
+      <use href="#chev-l" x="114" y="0" />
+      <use href="#chev-l" x="136" y="0" />
+      <use href="#chev-l" x="158" y="0" />
+    </g>
+
+    <!-- Reusable Factorio 8-Tooth Gear (centered at 0,0, outer r=25) -->
+    <g id="factorio-gear">
+      <path d="M -4,-25 L 4,-25 L 5,-19 L 11,-17 L 16,-20 L 20,-16 L 17,-11 L 19,-5 L 25,-4 L 25,4 L 19,5 L 17,11 L 20,16 L 16,20 L 11,17 L 5,19 L 4,25 L -4,25 L -5,19 L -11,17 L -16,20 L -20,16 L -17,11 L -19,5 L -25,4 L -25,-4 L -19,-5 L -17,-11 L -20,-16 L -16,-20 L -11,-17 L -5,-19 Z"
+            stroke="#1e1812" stroke-width="2" stroke-linejoin="round" />
+      <circle cx="0" cy="0" r="14" fill="none" stroke="#1e1812" stroke-width="2" opacity="0.55" />
+      <circle cx="0" cy="0" r="7" fill="#1b1e23" stroke="#1e1812" stroke-width="2" />
+    </g>
+
+    <!-- Authentic Factorio 45° Top-Down Steel Chest (width=68, height=62, top-left at 0,0) -->
+    <g id="steel-chest">
+      <!-- Ground cast shadow right/bottom (Factorio isometric shadow) -->
+      <rect x="6" y="26" width="66" height="36" rx="2" fill="#0c0e11" opacity="0.55" />
+
+      <!-- ================= TOP LID (45° RECESS & VERTICAL RIBS) ================= -->
+      <!-- Recessed dark steel roof tray -->
+      <rect x="6" y="3" width="56" height="29" fill="#23252d" stroke="#14161a" stroke-width="1.5" />
+      <!-- Deep inner shadow on left & top of lid tray -->
+      <rect x="7" y="4" width="5" height="27" fill="#121318" />
+      <rect x="7" y="4" width="54" height="3" fill="#15171c" />
+
+      <!-- 5 Bright Vertical Corrugated Steel Ribs on Top Lid -->
+      <rect x="13" y="5" width="6" height="26" fill="url(#chest-top-rib)" stroke="#262932" stroke-width="0.8" />
+      <rect x="22" y="5" width="6" height="26" fill="url(#chest-top-rib)" stroke="#262932" stroke-width="0.8" />
+      <rect x="31" y="5" width="6" height="26" fill="url(#chest-top-rib)" stroke="#262932" stroke-width="0.8" />
+      <rect x="40" y="5" width="6" height="26" fill="url(#chest-top-rib)" stroke="#262932" stroke-width="0.8" />
+      <rect x="49" y="5" width="6" height="26" fill="url(#chest-top-rib)" stroke="#262932" stroke-width="0.8" />
+
+      <!-- Subtle weathered shadow band across middle of top ribs -->
+      <rect x="11" y="13" width="47" height="5" fill="#3a332c" opacity="0.22" />
+
+      <!-- Top Back Rim -->
+      <rect x="7" y="2" width="54" height="3.5" fill="#8c95a2" stroke="#181a1f" stroke-width="1.2" />
+      <line x1="9" y1="3" x2="59" y2="3" stroke="#d8e0eb" stroke-width="1" />
+
+      <!-- Left & Right Raised Side Frame Rails of Top Lid (with notched ears) -->
+      <path d="M 2,1 L 9,1 L 9,6 L 7.5,6 L 7.5,26 L 9,26 L 9,32 L 2,32 L 2,24 L 3.5,24 L 3.5,9 L 2,9 Z"
+            fill="url(#chest-rim-v)" stroke="#181a1f" stroke-width="1.3" stroke-linejoin="round" />
+      <path d="M 66,1 L 59,1 L 59,6 L 60.5,6 L 60.5,26 L 59,26 L 59,32 L 66,32 L 66,24 L 64.5,24 L 64.5,9 L 66,9 Z"
+            fill="url(#chest-rim-v)" stroke="#181a1f" stroke-width="1.3" stroke-linejoin="round" />
+      <!-- Specular highlights on side rails -->
+      <line x1="4" y1="2.5" x2="4" y2="30" stroke="#e2eaf4" stroke-width="1.2" />
+      <line x1="63.5" y1="2.5" x2="63.5" y2="30" stroke="#e2eaf4" stroke-width="1.2" />
+
+      <!-- ================= FRONT FACE (SHADED VERTICAL WALL) ================= -->
+      <!-- Outer Front Steel Frame -->
+      <path d="M 3,31 L 65,31 L 65,60 L 58,60 L 56,58 L 12,58 L 10,60 L 3,60 Z"
+            fill="url(#chest-front-pillar)" stroke="#16181c" stroke-width="1.5" stroke-linejoin="round" />
+
+      <!-- Recessed Dark Front Panel -->
+      <rect x="9.5" y="34.5" width="49" height="20.5" fill="#1b1d23" stroke="#111317" stroke-width="1.2" />
+
+      <!-- 5 Shaded Vertical Corrugated Ribs continuing down Front Face -->
+      <rect x="13" y="35" width="6" height="19.5" fill="url(#chest-front-rib)" />
+      <rect x="22" y="35" width="6" height="19.5" fill="url(#chest-front-rib)" />
+      <rect x="31" y="35" width="6" height="19.5" fill="url(#chest-front-rib)" />
+      <rect x="40" y="35" width="6" height="19.5" fill="url(#chest-front-rib)" />
+      <rect x="49" y="35" width="6" height="19.5" fill="url(#chest-front-rib)" />
+
+      <!-- Top overhang shadow on front panel -->
+      <rect x="10" y="35" width="48" height="3.5" fill="#0f1115" opacity="0.65" />
+
+      <!-- Horizontal Middle Rim / Crossbar (between Top Lid and Front Face) -->
+      <path d="M 2.5,30 L 9,28.5 L 11,30.5 L 57,30.5 L 59,28.5 L 65.5,30 L 65.5,35 L 2.5,35 Z"
+            fill="#939ca8" stroke="#181a1f" stroke-width="1.3" stroke-linejoin="round" />
+      <line x1="4" y1="31.5" x2="64" y2="31.5" stroke="#eef4fb" stroke-width="1.4" />
+      <line x1="4" y1="33.8" x2="64" y2="33.8" stroke="#535963" stroke-width="1" />
+
+      <!-- Center Brass/Steel U-Latch on Front Face -->
+      <rect x="26.5" y="34.5" width="15" height="11" rx="1.5" fill="#181a20" stroke="#474d57" stroke-width="1" />
+      <!-- Left & right vertical latch brackets -->
+      <rect x="28.5" y="35" width="2.5" height="8.5" fill="#b8c2ce" />
+      <rect x="37" y="35" width="2.5" height="8.5" fill="#b8c2ce" />
+      <!-- Brass horizontal latch bar -->
+      <rect x="28.5" y="40.5" width="11" height="3.8" rx="0.8" fill="#dfd08c" stroke="#1a1c20" stroke-width="1" />
+      <line x1="29.5" y1="41.8" x2="38.5" y2="41.8" stroke="#fff7cc" stroke-width="1" />
+    </g>
+
+    <!-- Assembler Corner Bumper (22x22) -->
+    <g id="corner-bumper">
+      <rect x="0" y="0" width="22" height="22" rx="3" fill="#d99b26" stroke="#1b1d21" stroke-width="2" />
+      <line x1="4" y1="4" x2="18" y2="18" stroke="#614308" stroke-width="2" />
+      <circle cx="11" cy="11" r="3.5" fill="#454c56" stroke="#1b1d21" stroke-width="1.5" />
+    </g>
+
+    <!-- Reusable Horizontal Swap Icon (⇄) in SVG paths -->
+    <g id="swap-horiz">
+      <line x1="-8" y1="-3.5" x2="5" y2="-3.5" stroke="#ff922b" stroke-width="2.2" stroke-linecap="round" />
+      <polygon points="9,-3.5 3,-7.5 3,0.5" fill="#ff922b" />
+      <line x1="8" y1="3.5" x2="-5" y2="3.5" stroke="#ff922b" stroke-width="2.2" stroke-linecap="round" />
+      <polygon points="-9,3.5 -3,-0.5 -3,7.5" fill="#ff922b" />
+    </g>
+
+    <!-- Reusable Vertical Swap Icon (⇅) in SVG paths -->
+    <g id="swap-vert">
+      <line x1="-3.5" y1="7" x2="-3.5" y2="-4" stroke="#ff922b" stroke-width="2" stroke-linecap="round" />
+      <polygon points="-3.5,-8 -7,-2 0,-2" fill="#ff922b" />
+      <line x1="3.5" y1="-7" x2="3.5" y2="4" stroke="#ff922b" stroke-width="2" stroke-linecap="round" />
+      <polygon points="3.5,8 0,2 7,2" fill="#ff922b" />
+    </g>
+  </defs>
+
+  <!-- =================================================================== -->
+  <!-- GKE CLUSTER BOUNDARY                                                -->
+  <!-- =================================================================== -->
+  <g id="gke-cluster">
+    <rect x="216" y="24" width="886" height="516" rx="12"
+          fill="#140e07" fill-opacity="0.45"
+          stroke="#d9822b" stroke-width="2.5" stroke-dasharray="12 6" />
+
+    <!-- GKE Cluster Header Plate -->
+    <g transform="translate(238, 10)" filter="url(#shadow)">
+      <rect x="0" y="0" width="168" height="28" rx="5" fill="#282018" stroke="#d9822b" stroke-width="2" />
+      <rect x="3" y="3" width="12" height="22" rx="2" fill="url(#hazard-stripes)" />
+      <text x="92" y="19" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" fill="#f9e6d2" letter-spacing="0.06em">GKE CLUSTER</text>
+    </g>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- NETWORK CONNECTION 1: CLIENT <-> GATEWAY (YELLOW BELTS, UDP)        -->
+  <!-- =================================================================== -->
+  <g id="belts-client-gateway">
+    <!-- Top Belt: Client -> Gateway (Moving RIGHT >>>) -->
+    <use href="#yellow-belt-right-136" x="158" y="154" filter="url(#shadow)" />
+    <text x="190" y="146" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="700" fill="#ffd43b">UDP ▶</text>
+
+    <!-- Bottom Belt: Gateway -> Client (Moving LEFT <<<) -->
+    <use href="#yellow-belt-left-136" x="158" y="198" filter="url(#shadow)" />
+    <text x="190" y="238" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="700" fill="#ffd43b">◀ UDP</text>
+
+    <!-- Protocol Pill Badge -->
+    <g transform="translate(198, 98)" filter="url(#shadow)">
+      <rect x="0" y="0" width="96" height="26" rx="5" fill="#261c12" stroke="#f5c400" stroke-width="1.8" />
+      <text x="48" y="17" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#ffe66d">UDP :34197</text>
+    </g>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- 1. FACTORIO CLIENT (LEFT, OUTSIDE CLUSTER)                          -->
+  <!-- =================================================================== -->
+  <g id="factorio-client" transform="translate(18, 98)" filter="url(#shadow)">
+    <!-- Belt Chute Hoods on Right Side -->
+    <rect x="142" y="52" width="10" height="32" rx="2" fill="#5b636e" stroke="#1a1612" stroke-width="2" />
+    <rect x="142" y="96" width="10" height="32" rx="2" fill="#5b636e" stroke="#1a1612" stroke-width="2" />
+
+    <!-- Machine Outer Chassis -->
+    <rect x="0" y="0" width="146" height="180" rx="8" fill="url(#combinator-frame)" stroke="#1a1612" stroke-width="3" />
+    <rect x="5" y="5" width="136" height="170" rx="5" fill="none" stroke="#8c6d46" stroke-width="1.5" />
+
+    <!-- Corner Rivets -->
+    <circle cx="13" cy="13" r="3" fill="#d99b26" stroke="#1a1612" stroke-width="1.2" />
+    <circle cx="133" cy="13" r="3" fill="#d99b26" stroke="#1a1612" stroke-width="1.2" />
+    <circle cx="13" cy="167" r="3" fill="#d99b26" stroke="#1a1612" stroke-width="1.2" />
+    <circle cx="133" cy="167" r="3" fill="#d99b26" stroke="#1a1612" stroke-width="1.2" />
+
+    <!-- Inner Recessed Gear Window -->
+    <rect x="21" y="20" width="104" height="84" rx="6" fill="#181410" stroke="#5c4933" stroke-width="2" />
+
+    <!-- Factorio Orange Gear Emblem -->
+    <g transform="translate(73, 62)" fill="url(#factorio-orange)">
+      <use href="#factorio-gear" transform="scale(1.25)" />
+    </g>
+
+    <!-- Status LED -->
+    <circle cx="31" cy="30" r="4" fill="#51cf66" filter="url(#soft-glow)" stroke="#143319" stroke-width="1" />
+
+    <!-- Label Plate -->
+    <rect x="13" y="116" width="120" height="46" rx="4" fill="#211911" stroke="#6e563a" stroke-width="1.5" />
+    <text x="73" y="136" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="800" fill="#f9e6d2">Factorio Client</text>
+    <text x="73" y="153" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#d4b896">Game Player</text>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- NETWORK CONNECTION 2: GATEWAY <-> SIDECAR (WEBSOCKET, AUTO-CYCLED)  -->
+  <!-- =================================================================== -->
+  <g id="belts-gateway-sidecar">
+    <!-- Top Belt: Gateway -> Sidecar (Moving RIGHT >>>) -->
+    <use href="#yellow-belt-right-180" x="444" y="154" filter="url(#shadow)" />
+    <!-- Bottom Belt: Sidecar -> Gateway (Moving LEFT <<<) -->
+    <use href="#yellow-belt-left-180" x="444" y="198" filter="url(#shadow)" />
+
+    <!-- Direction Labels -->
+    <text x="520" y="146" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="700" fill="#66d9e8">WS Frames ▶</text>
+    <text x="520" y="238" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="700" fill="#66d9e8">◀ WS Frames</text>
+
+    <!-- Auto-Cycled WebSocket Callout Badge -->
+    <g transform="translate(448, 72)" filter="url(#shadow)">
+      <rect x="0" y="0" width="144" height="54" rx="6" fill="#1e242b" stroke="#66d9e8" stroke-width="2" />
+      <!-- Factorio-style cycle arrows icon -->
+      <g transform="translate(24, 27)">
+        <path d="M -10,-4 A 11,11 0 1,1 8,-7" fill="none" stroke="#ffd43b" stroke-width="2.4" stroke-linecap="round" />
+        <polygon points="10,-11 11,-2 3,-6" fill="#ffd43b" />
+        <path d="M 10,4 A 11,11 0 1,1 -8,7" fill="none" stroke="#66d9e8" stroke-width="2.4" stroke-linecap="round" />
+        <polygon points="-10,11 -11,2 -3,6" fill="#66d9e8" />
+      </g>
+      <text x="86" y="22" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="800" fill="#f9e6d2">WebSocket</text>
+      <text x="86" y="39" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#ffd43b">Auto-cycled (4m)</text>
+    </g>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- 2. GATEWAY (FACTORIO SPLITTER / DECIDER COMBINATOR)                 -->
+  <!-- =================================================================== -->
+  <g id="factorio-gateway" transform="translate(288, 90)" filter="url(#shadow)">
+    <!-- Belt Chute Hoods (Left & Right) -->
+    <rect x="-8" y="60" width="12" height="32" rx="2" fill="#5b636e" stroke="#1a1612" stroke-width="2" />
+    <rect x="-8" y="104" width="12" height="32" rx="2" fill="#5b636e" stroke="#1a1612" stroke-width="2" />
+    <rect x="156" y="60" width="12" height="32" rx="2" fill="#5b636e" stroke="#1a1612" stroke-width="2" />
+    <rect x="156" y="104" width="12" height="32" rx="2" fill="#5b636e" stroke="#1a1612" stroke-width="2" />
+
+    <!-- Combinator / Splitter Main Chassis -->
+    <rect x="0" y="0" width="160" height="196" rx="8" fill="url(#combinator-frame)" stroke="#181410" stroke-width="3" />
+    <rect x="5" y="5" width="150" height="186" rx="5" fill="none" stroke="#b08246" stroke-width="1.5" />
+
+    <!-- Top Hazard Bar -->
+    <rect x="12" y="10" width="136" height="10" rx="2" fill="url(#hazard-stripes)" stroke="#181410" stroke-width="1" />
+
+    <!-- Copper Combinator Coils on Top -->
+    <rect x="28" y="-7" width="14" height="9" rx="2" fill="#d97724" stroke="#181410" stroke-width="1.5" />
+    <rect x="118" y="-7" width="14" height="9" rx="2" fill="#d97724" stroke="#181410" stroke-width="1.5" />
+
+    <!-- Central Conversion Display Screen -->
+    <rect x="16" y="30" width="128" height="86" rx="6" fill="#14181d" stroke="#7c848e" stroke-width="2" />
+    <!-- Status LEDs -->
+    <circle cx="28" cy="42" r="3.5" fill="#51cf66" filter="url(#soft-glow)" />
+    <circle cx="40" cy="42" r="3.5" fill="#ffd43b" />
+
+    <!-- Conversion Graphic inside Screen -->
+    <g transform="translate(80, 76)">
+      <rect x="-54" y="-16" width="38" height="26" rx="4" fill="#2b2316" stroke="#f5c400" stroke-width="1.5" />
+      <text x="-35" y="1" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="800" fill="#ffe66d">UDP</text>
+
+      <use href="#swap-horiz" x="0" y="-3" />
+
+      <rect x="16" y="-16" width="38" height="26" rx="4" fill="#16262e" stroke="#66d9e8" stroke-width="1.5" />
+      <text x="35" y="1" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="800" fill="#66d9e8">WS</text>
+    </g>
+
+    <!-- Label Plate -->
+    <rect x="14" y="128" width="132" height="54" rx="4" fill="#211911" stroke="#6e563a" stroke-width="1.5" />
+    <text x="80" y="150" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="800" fill="#f9e6d2">UDP Gateway</text>
+    <text x="80" y="169" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#ffa94d">factorio-gateway</text>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- 3. MAIN SUBSTRATE ACTOR (STYLIZED FACTORIO ASSEMBLING MACHINE)      -->
+  <!-- =================================================================== -->
+  <g id="substrate-actor-assembler" transform="translate(596, 48)">
+    <!-- Outer Assembler Chassis -->
+    <rect x="0" y="0" width="484" height="284" rx="12" fill="url(#assembler-frame)" stroke="#15181d" stroke-width="3.5" filter="url(#shadow)" />
+    <!-- Metallic Bevel Highlight -->
+    <rect x="6" y="6" width="472" height="272" rx="9" fill="none" stroke="#6c7888" stroke-width="1.8" />
+
+    <!-- Top Assembler Exhaust Pipes / Vents -->
+    <rect x="150" y="-6" width="46" height="8" rx="2" fill="#5c6672" stroke="#15181d" stroke-width="1.8" />
+    <rect x="290" y="-6" width="46" height="8" rx="2" fill="#5c6672" stroke="#15181d" stroke-width="1.8" />
+
+    <!-- 4 Iconic Factorio Assembler Yellow Corner Bumpers -->
+    <use href="#corner-bumper" x="-4" y="-4" />
+    <use href="#corner-bumper" x="466" y="-4" />
+    <use href="#corner-bumper" x="-4" y="266" />
+    <use href="#corner-bumper" x="466" y="266" />
+
+    <!-- Belt Intake Hoods on Left Boundary of the Actor -->
+    <rect x="-8" y="102" width="14" height="32" rx="2" fill="#d99b26" stroke="#15181d" stroke-width="2" />
+    <rect x="-8" y="146" width="14" height="32" rx="2" fill="#d99b26" stroke="#15181d" stroke-width="2" />
+
+    <!-- Recessed Dark Interior Bay of the Assembler -->
+    <rect x="18" y="48" width="448" height="216" rx="8" fill="#181c22" stroke="#0f1216" stroke-width="2.5" />
+
+    <!-- Actor Header Bar (Top of Assembler) -->
+    <rect x="34" y="12" width="416" height="28" rx="4" fill="#232830" stroke="#d99b26" stroke-width="1.5" />
+    <circle cx="50" cy="26" r="5" fill="#51cf66" filter="url(#soft-glow)" stroke="#143319" stroke-width="1.2" />
+    <text x="248" y="31" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="800" fill="#ffe66d" letter-spacing="0.04em">SUBSTRATE ACTOR (ASSEMBLER • world-vanilla)</text>
+
+    <!-- =============================================================== -->
+    <!-- NETWORK CONNECTION 3: SIDECAR <-> FACTORIO (YELLOW BELTS, UDP)  -->
+    <!-- =============================================================== -->
+    <g id="belts-sidecar-factorio">
+      <!-- Top Belt: Sidecar -> Factorio (Moving RIGHT >>>) -->
+      <use href="#yellow-belt-right-136" x="150" y="106" filter="url(#shadow)" />
+      <text x="218" y="98" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="700" fill="#ffd43b">UDP ▶</text>
+
+      <!-- Bottom Belt: Factorio -> Sidecar (Moving LEFT <<<) -->
+      <use href="#yellow-belt-left-136" x="150" y="150" filter="url(#shadow)" />
+      <text x="218" y="190" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="700" fill="#ffd43b">◀ UDP</text>
+
+      <!-- Loopback Badge -->
+      <rect x="172" y="204" width="92" height="22" rx="4" fill="#232830" stroke="#7c848e" stroke-width="1.2" />
+      <text x="218" y="219" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#d4b896">127.0.0.1</text>
+    </g>
+
+    <!-- =============================================================== -->
+    <!-- 3A. LITTLE SIDECAR (INSIDE ACTOR LEFT BOUNDARY)                 -->
+    <!-- =============================================================== -->
+    <g id="actor-sidecar" transform="translate(26, 68)" filter="url(#shadow)">
+      <!-- Belt Chute Hoods on Right -->
+      <rect x="122" y="34" width="8" height="32" rx="2" fill="#5b636e" stroke="#181410" stroke-width="1.5" />
+      <rect x="122" y="78" width="8" height="32" rx="2" fill="#5b636e" stroke="#181410" stroke-width="1.5" />
+
+      <!-- Compact Combinator Housing -->
+      <rect x="0" y="0" width="126" height="148" rx="6" fill="url(#combinator-frame)" stroke="#d99b26" stroke-width="2" />
+
+      <!-- Mini Conversion Screen -->
+      <rect x="12" y="14" width="102" height="64" rx="4" fill="#14181d" stroke="#6c7888" stroke-width="1.5" />
+      <text x="63" y="31" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="800" fill="#66d9e8">WS</text>
+      <use href="#swap-vert" x="63" y="45" />
+      <text x="63" y="70" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="800" fill="#ffe66d">UDP</text>
+
+      <!-- Sidecar Label -->
+      <rect x="10" y="88" width="106" height="48" rx="4" fill="#211911" stroke="#6e563a" stroke-width="1.2" />
+      <text x="63" y="108" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="800" fill="#f9e6d2">Sidecar</text>
+      <text x="63" y="125" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#ffa94d">factorio-sidecar</text>
+    </g>
+
+    <!-- =============================================================== -->
+    <!-- 3B. FACTORIO SERVER (ASSEMBLER GEAR CORE)                       -->
+    <!-- =============================================================== -->
+    <g id="factorio-server-core" transform="translate(282, 60)" filter="url(#shadow)">
+      <!-- Belt Chute Hoods on Left -->
+      <rect x="-6" y="42" width="10" height="32" rx="2" fill="#5b636e" stroke="#15181d" stroke-width="1.5" />
+      <rect x="-6" y="86" width="10" height="32" rx="2" fill="#5b636e" stroke="#15181d" stroke-width="1.5" />
+
+      <!-- Inner Assembler Core Housing -->
+      <rect x="0" y="0" width="170" height="190" rx="8" fill="#29303a" stroke="#f5c400" stroke-width="2.2" />
+
+      <!-- Circular Recessed Gear Pit (Signature Factorio Assembler visual) -->
+      <circle cx="85" cy="64" r="48" fill="#121519" stroke="#535d69" stroke-width="3" />
+      <circle cx="85" cy="64" r="42" fill="none" stroke="#2c333d" stroke-width="1.5" stroke-dasharray="6 4" />
+
+      <!-- Two Meshing Factorio Gears inside the Pit -->
+      <g transform="translate(68, 52)" fill="#d99b26">
+        <use href="#factorio-gear" transform="scale(1.05)" />
+      </g>
+      <g transform="translate(106, 78)" fill="#8d99a6">
+        <use href="#factorio-gear" transform="scale(0.78) rotate(22)" />
+      </g>
+
+      <!-- Assembler Crafting Progress Bar -->
+      <rect x="24" y="120" width="122" height="8" rx="4" fill="#14181d" stroke="#46505a" stroke-width="1" />
+      <rect x="25" y="121" width="92" height="6" rx="3" fill="#51cf66" />
+
+      <!-- Factorio Server Label Plate -->
+      <rect x="14" y="135" width="142" height="44" rx="4" fill="#211911" stroke="#d99b26" stroke-width="1.5" />
+      <text x="85" y="155" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="800" fill="#f9e6d2">Factorio Server</text>
+      <text x="85" y="171" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#ffe66d">:34197 / UDP</text>
+    </g>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- SUSPEND / RESUME CONNECTION TO GCS STEEL CHESTS                     -->
+  <!-- =================================================================== -->
+  <g id="gcs-swap-connector">
+    <!-- Bidirectional dashed snapshot pipe -->
+    <line x1="816" y1="334" x2="816" y2="394" stroke="#ffd43b" stroke-width="3" stroke-dasharray="6 4" />
+    <polygon points="816,332 809,344 823,344" fill="#ffd43b" />
+    <polygon points="816,396 809,384 823,384" fill="#ffd43b" />
+
+    <!-- Label Pill -->
+    <g transform="translate(832, 349)" filter="url(#shadow)">
+      <rect x="0" y="0" width="194" height="28" rx="5" fill="#261c12" stroke="#d99b26" stroke-width="1.5" />
+      <text x="97" y="18" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" font-weight="700" fill="#f9e6d2">Suspend / Resume (zstd)</text>
+    </g>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- 4. CLOUD STORAGE (GCS) — STEEL CHESTS WHERE OTHER ACTORS HIBERNATE  -->
+  <!-- =================================================================== -->
+  <g id="gcs-steel-chests" transform="translate(540, 398)">
+    <!-- Storage Logistics Pad -->
+    <rect x="0" y="0" width="540" height="128" rx="10" fill="#1b2026" fill-opacity="0.82" stroke="#8d99a6" stroke-width="2.2" filter="url(#shadow)" />
+
+    <!-- GCS Header Plate -->
+    <rect x="16" y="-13" width="332" height="24" rx="4" fill="#2c343e" stroke="#abb6c2" stroke-width="1.5" />
+    <text x="182" y="3" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="800" fill="#f9e6d2" letter-spacing="0.04em">CLOUD STORAGE (GCS) • HIBERNATING ACTORS</text>
+
+    <!-- Steel Chest 1: world-deathworld -->
+    <g transform="translate(56, 20)" filter="url(#shadow)">
+      <use href="#steel-chest" />
+      <rect x="52" y="-6" width="30" height="16" rx="4" fill="#182634" stroke="#74c0fc" stroke-width="1.2" />
+      <text x="67" y="6" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" font-weight="800" fill="#74c0fc">Zzz</text>
+      <text x="34" y="80" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" font-weight="700" fill="#f9e6d2">world-deathworld</text>
+      <text x="34" y="95" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#d4b896">(:34198)</text>
+    </g>
+
+    <!-- Steel Chest 2: world-railworld -->
+    <g transform="translate(236, 20)" filter="url(#shadow)">
+      <use href="#steel-chest" />
+      <rect x="52" y="-6" width="30" height="16" rx="4" fill="#182634" stroke="#74c0fc" stroke-width="1.2" />
+      <text x="67" y="6" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" font-weight="800" fill="#74c0fc">Zzz</text>
+      <text x="34" y="80" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" font-weight="700" fill="#f9e6d2">world-railworld</text>
+      <text x="34" y="95" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#d4b896">(:34199)</text>
+    </g>
+
+    <!-- Steel Chest 3: world-ribbonworld -->
+    <g transform="translate(416, 20)" filter="url(#shadow)">
+      <use href="#steel-chest" />
+      <rect x="52" y="-6" width="30" height="16" rx="4" fill="#182634" stroke="#74c0fc" stroke-width="1.2" />
+      <text x="67" y="6" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" font-weight="800" fill="#74c0fc">Zzz</text>
+      <text x="34" y="80" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" font-weight="700" fill="#f9e6d2">world-ribbonworld</text>
+      <text x="34" y="95" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#d4b896">(:34200)</text>
+    </g>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- FACTORIO BLUEPRINT LEGEND (BOTTOM-LEFT INSIDE CLUSTER)              -->
+  <!-- =================================================================== -->
+  <g id="factorio-legend" transform="translate(238, 398)" filter="url(#shadow)">
+    <rect x="0" y="0" width="276" height="128" rx="8" fill="#211911" fill-opacity="0.85" stroke="#6e563a" stroke-width="1.8" />
+    <text x="16" y="24" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" font-weight="800" fill="#ffa94d" letter-spacing="0.05em">FACTORIO LEGEND</text>
+    <line x1="16" y1="31" x2="260" y2="31" stroke="#6e563a" stroke-width="1" />
+
+    <!-- Legend Item 1: Yellow Belt -->
+    <g transform="translate(16, 40) scale(0.32, 0.72)">
+      <use href="#yellow-belt-right-136" />
+    </g>
+    <text x="70" y="53" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#f2d9b2">Yellow Belt = Network Traffic</text>
+
+    <!-- Legend Item 2: Assembler -->
+    <rect x="26" y="66" width="24" height="20" rx="3" fill="url(#assembler-frame)" stroke="#d99b26" stroke-width="1.5" />
+    <circle cx="38" cy="76" r="5" fill="#d99b26" />
+    <text x="70" y="81" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#f2d9b2">Assembler = Active Substrate Actor</text>
+
+    <!-- Legend Item 3: Steel Chest -->
+    <g transform="translate(27, 94) scale(0.32)">
+      <use href="#steel-chest" />
+    </g>
+    <text x="70" y="109" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#f2d9b2">Steel Chest = Hibernating in GCS</text>
+  </g>
+</svg>

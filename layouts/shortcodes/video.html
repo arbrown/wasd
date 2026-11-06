@@ -1,0 +1,26 @@
+{{- $src := or (.Get "src") (.Get 0) -}}
+{{- $caption := or (.Get "caption") (.Get "title") (.Get 1) -}}
+{{- $autoplay := eq ( printf "%v" (.Get "autoplay") ) "true" -}}
+{{- $loop := eq ( printf "%v" (.Get "loop") ) "true" -}}
+{{- $muted := or $autoplay (eq ( printf "%v" (.Get "muted") ) "true") -}}
+{{- $controls := ne ( printf "%v" (.Get "controls") ) "false" -}}
+{{- $preload := default "metadata" (.Get "preload") -}}
+{{- $poster := .Get "poster" -}}
+{{- $width := .Get "width" -}}
+<figure class="image-figure">
+  <video
+    {{- if $controls }} controls{{ end -}}
+    {{- if $autoplay }} autoplay{{ end -}}
+    {{- if $loop }} loop{{ end -}}
+    {{- if $muted }} muted{{ end -}}
+    {{- with $poster }} poster="{{ . | safeURL }}"{{ end }}
+    {{- with $width }} style="width: {{ . }}; max-width: 100%;"{{ end }}
+    playsinline
+    preload="{{ $preload }}">
+    <source src="{{ $src | safeURL }}" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  {{- with $caption }}
+  <figcaption>{{ . | markdownify }}</figcaption>
+  {{- end }}
+</figure>
