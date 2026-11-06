@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" width="100%" height="auto" role="img" aria-labelledby="diagram-title diagram-desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" width="1120" height="560" role="img" aria-labelledby="diagram-title diagram-desc">
   <title id="diagram-title">Factorio Gateway and Sidecar UDP-over-WebSocket Architecture</title>
   <desc id="diagram-desc">Factorio-themed architecture diagram showing bidirectional UDP traffic on yellow transport belts from the Factorio Client into the GKE Cluster Gateway, converting to an auto-cycled WebSocket connection across the boundary into the Substrate Actor (stylized Assembling Machine) where a Sidecar converts it back to UDP for the Factorio Server, while other worlds hibernate in GCS Steel Chests.</desc>
 

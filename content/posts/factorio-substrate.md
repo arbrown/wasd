@@ -2,6 +2,7 @@
 title = "The Factory Must Sleep: On-Demand Factorio Worlds with Agent Substrate on GKE"
 date = 2026-11-05T15:15:19-07:00
 draft = true
+images = ["/images/factorio-substrate/factorio-substrate.png"]
 categories = ["Projects", "Kubernetes"]
 tags = ["factorio", "gaming", "gke", "gcp", "kubernetes", "agent-substrate", "gvisor", "tutorial"]
 description = "Running stateful, UDP-based Factorio game servers as on-demand, auto-suspending Agent Substrate Actors on GKE with multi-world multiplexing and scale-to-zero Spot nodes."
@@ -16,6 +17,8 @@ Last year I wrote about one of my favorite games of all time, [Factorio](https:/
 Now that my friends and I are looking to dust off our Factorio server and start a new 2.1 campaign, that got me thinking: how would I revisit this solution today with better tools? Lately I've been spending a lot of time with **[Agent Substrate](https://github.com/agent-substrate/substrate)** on [GKE](https://cloud.google.com/kubernetes-engine?utm_campaign=CDR_0x145aeba1_default_b423920039&utm_medium=external&utm_source=blog) (like in my [Agent Storybook Project](/posts/substrate-asp/)). Substrate was originally designed with AI agents, code interpreters, and RL environments in mind, but at its core, it's great at managing *any* stateful workload that needs fast checkpointing and restore.
 
 Factorio seemed like a great candidate because holding onto the game server state is critical, and we want it to hibernate when nobody is online and resume very quickly when players connect. So that got me thinking: is this actually a good fit, or am I just reaching here?
+
+![Factorio + Agent Substrate](/images/factorio-substrate/factorio-substrate.png)
 
 ## Can a Factorio Server Be an Agent Substrate Actor?
 
